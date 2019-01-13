@@ -1,0 +1,58 @@
+#------------------------------------------------------------------------------
+# Copyright 2019 Robert Cowart
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#------------------------------------------------------------------------------
+
+version: '3'
+services:
+  # The following services are examples for forwarding common UDP packets to multiple sources.
+  #   -s  The IP address on which to listen for UDP packets.
+  #   -p  The port number on which to listen for UDP packets.
+  #   -d  Sets the debug level.
+  #   <ipaddr/port>...  The IP address and port to which packets should be forwarded.
+  
+  samplicator-netflow:
+    image: robcowart/samplicator:1.0.0_1.3.8rc1
+    container_name: samplicator-netflow
+    restart: unless-stopped
+    network_mode: host
+    command: -s 192.2.0.1 -p 2055 -d 0 127.0.0.1/2055 192.2.0.111/2055
+
+  samplicator-ipfix:
+    image: robcowart/samplicator:1.0.0_1.3.8rc1
+    container_name: samplicator-ipfix
+    restart: unless-stopped
+    network_mode: host
+    command: -s 192.2.0.1 -p 4739 -d 0 127.0.0.1/4739 192.2.0.111/4739
+    
+  samplicator-sflow:
+    image: robcowart/samplicator:1.0.0_1.3.8rc1
+    container_name: samplicator-sflow
+    restart: unless-stopped
+    network_mode: host
+    command: -s 192.2.0.1 -p 6343 -d 0 127.0.0.1/6343 192.2.0.111/6343
+
+  samplicator-syslog:
+    image: robcowart/samplicator:1.0.0_1.3.8rc1
+    container_name: samplicator-syslog
+    restart: unless-stopped
+    network_mode: host
+    command: -s 192.2.0.1 -p 514 -d 0 127.0.0.1/514 192.2.0.111/514
+
+  samplicator-snmptrap:
+    image: robcowart/samplicator:1.0.0_1.3.8rc1
+    container_name: samplicator-snmptrap
+    restart: unless-stopped
+    network_mode: host
+    command: -s 192.2.0.1 -p 162 -d 0 127.0.0.1/162 192.2.0.111/162

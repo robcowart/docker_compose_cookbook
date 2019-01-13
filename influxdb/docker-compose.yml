@@ -1,0 +1,370 @@
+#------------------------------------------------------------------------------
+# Copyright 2019 Robert Cowart
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#------------------------------------------------------------------------------
+
+version: '3'
+services:
+  influxdb:
+    image: influxdb:1.7.2
+    container_name: influxdb
+    restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    hostname: influxdb
+    network_mode: bridge
+    ports:
+      - 8086:8086/tcp
+    volumes:
+      - /var/lib/influxdb:/var/lib/influxdb
+    environment:
+      INFLUXDB_HOSTNAME: 127.0.0.1
+
+      # Once every 24 hours InfluxDB will report usage data to usage.influxdata.com. Change this option to true to
+      # disable reporting.
+      INFLUXDB_REPORTING_DISABLED: 'true'
+
+      # Bind address to use for the RPC service for backup and restore.
+      INFLUXDB_BIND_ADDRESS: 0.0.0.0:8088
+ 
+
+
+      ### Controls the parameters for the Raft consensus group that stores metadata about the InfluxDB cluster.
+
+      # Where the metadata/raft database is stored
+      #INFLUXDB_META_DIR: /var/lib/influxdb/meta
+
+      # Automatically create a default retention policy when creating a database.
+      #INFLUXDB_META_RETENTION_AUTOCREATE: 'true'
+
+      # If log messages are printed for the meta service
+      #INFLUXDB_META_LOGGING_ENABLED: 'true'
+
+      
+      
+      ### Controls where the actual shard data for InfluxDB lives and how it is flushed from the WAL. "dir" may need to
+      ### be changed to a suitable place for your system, but the WAL settings are an advanced configuration. The
+      ### defaults should work for most systems.
+
+      # The directory where the TSM storage engine stores TSM files.
+      INFLUXDB_DATA_DIR: /var/lib/influxdb/data
+
+      # The directory where the TSM storage engine stores WAL files.
+      INFLUXDB_DATA_WAL_DIR: /var/lib/influxdb/wal
+
+      # The amount of time that a write will wait before fsyncing. A duration greater than 0 can be used to batch up
+      # multiple fsync calls. This is useful for slower disks or when WAL write contention is seen. A value of 0s
+      # fsyncs every write to the WAL. Values in the range of 0-100ms are recommended for non-SSD disks.
+      #INFLUXDB_DATA_WAL_FSYNC_DELAY: 0s
+
+      # The type of shard index to use for new shards. The default is an in-memory index that is recreated at startup.
+      # A value of "tsi1" will use a disk based index that supports higher cardinality datasets.
+      INFLUXDB_DATA_INDEX_VERSION: tsi1
+
+      # Trace logging provides more verbose output around the tsm engine. Turning this on can provide more useful
+      # output for debugging tsm engine issues.
+      #INFLUXDB_DATA_TRACE_LOGGING_ENABLED: 'false'
+
+      # Whether queries should be logged before execution. Very useful for troubleshooting, but will log any sensitive
+      # data contained within a query.
+      #INFLUXDB_DATA_QUERY_LOG_ENABLED: 'true'
+
+      # Validates incoming writes to ensure keys only have valid unicode characters. This setting will incur a small
+      # overhead because every key must be checked.
+      #INFLUXDB_DATA_VALIDATE_KEYS: 'false'
+
+
+
+      ### Settings for the TSM engine
+
+      # CacheMaxMemorySize is the maximum size a shard's cache can reach before it starts rejecting writes. Valid size
+      # suffixes are k, m, or g (case insensitive, 1024 = 1k). Values without a size suffix are in bytes.
+      #INFLUXDB_DATA_CACHE_MAX_MEMORY_SIZE: 1g
+
+      # CacheSnapshotMemorySize is the size at which the engine will snapshot the cache and write it to a TSM file,
+      # freeing up memory. Valid size suffixes are k, m, or g (case insensitive, 1024 = 1k). Values without a size
+      # suffix are in bytes.
+      #INFLUXDB_DATA_CACHE_SNAPSHOT_MEMORY_SIZE: 25m
+
+      # CacheSnapshotWriteColdDuration is the length of time at which the engine will snapshot the cache and write it
+      # to a new TSM file if the shard hasn't received writes or deletes
+      #INFLUXDB_DATA_CACHE_SNAPSHOT_WRITE_COLD_DURATION: 10m
+
+      # CompactFullWriteColdDuration is the duration at which the engine will compact all TSM files in a shard if it
+      # hasn't received a write or delete.
+      #INFLUXDB_DATA_COMPACT_FULL_WRITE_COLD_DURATION: 4h
+
+      # The maximum number of concurrent full and level compactions that can run at one time. A value of 0 results in
+      # 50% of runtime.GOMAXPROCS(0) used at runtime. Any number greater than 0 limits compactions to that value. This
+      # setting does not apply to cache snapshotting.
+      #INFLUXDB_DATA_MAX_CONCURRENT_COMPACTIONS: 0
+
+      # CompactThroughput is the rate limit in bytes per second that we will allow TSM compactions to write to disk.
+      # Note that short bursts are allowed to happen at a possibly larger value, set by CompactThroughputBurst.
+      #INFLUXDB_DATA_COMPACT_THROUGHPUT: 48m
+
+      # CompactThroughputBurst is the rate limit in bytes per second that we will allow TSM compactions to write to
+      # disk.
+      #INFLUXDB_DATA_COMPACT_THROUGHPUT_BURST: 48m
+
+      # The threshold, in bytes, when an index write-ahead log file will compact into an index file. Lower sizes will
+      # cause log files to be compacted more quickly and result in lower heap usage at the expense of write throughput.
+      # Higher sizes will be compacted less frequently, store more series in-memory, and provide higher write
+      # throughput. Valid size suffixes are k, m, or g (case insensitive, 1024 = 1k). Values without a size suffix are
+      # in bytes.
+      #INFLUXDB_DATA_MAX_INDEX_LOG_FILE_SIZE: 1m
+
+      # The maximum series allowed per database before writes are dropped. This limit can prevent high cardinality
+      # issues at the database level. This limit can be disabled by setting it to 0.
+      INFLUXDB_DATA_MAX_SERIES_PER_DATABASE: 0
+
+      # The maximum number of tag values per tag that are allowed before writes are dropped. This limit can prevent
+      # high cardinality tag values from being written to a measurement. This limit can be disabled by setting it to 0.
+      INFLUXDB_DATA_MAX_VALUES_PER_TAG: 0
+
+      # If true, then the mmap advise value MADV_WILLNEED will be provided to the kernel with respect to TSM files.
+      # This setting has been found to be problematic on some kernels, and defaults to off. It might help users who
+      # have slow disks in some cases.
+      #INFLUXDB_DATA_TSM_USE_MADV_WILLNEED: 'false'
+
+
+
+      ### Controls the clustering service configuration.
+
+      # The default time a write request will wait until a "timeout" error is returned to the caller.
+      #INFLUXDB_COORDINATOR_WRITE_TIMEOUT: 10s
+
+      # The maximum number of concurrent queries allowed to be executing at one time. If a query is executed and
+      # exceeds this limit, an error is returned to the caller. This limit can be disabled by setting it to 0.
+      #INFLUXDB_COORDINATOR_MAX_CONCURRENT_QUERIES: 0
+
+      # The maximum time a query will is allowed to execute before being killed by the system. This limit can help
+      # prevent run away queries. Setting the value to 0 disables the limit.
+      #INFLUXDB_COORDINATOR_QUERY_TIMEOUT: 0s
+
+      # The time threshold when a query will be logged as a slow query. This limit can be set to help discover slow or
+      # resource intensive queries. Setting the value to 0 disables the slow query logging.
+      #INFLUXDB_COORDINATOR_LOG_QUERIES_AFTER: 0s
+
+      # The maximum number of points a SELECT can process. A value of 0 will make the maximum point count unlimited.
+      # This will only be checked every second so queries will not be aborted immediately when hitting the limit.
+      #INFLUXDB_COORDINATOR_MAX_SELECT_POINT: 0
+
+      # The maximum number of series a SELECT can run. A value of 0 will make the maximum series count unlimited.
+      #INFLUXDB_COORDINATOR_MAX_SELECT_SERIES: 0
+
+      # The maxium number of group by time bucket a SELECT can create. A value of zero will max the maximum number of
+      # buckets unlimited.
+      #INFLUXDB_COORDINATOR_MAX_SELECT_BUCKETS: 0
+
+
+
+      ### Controls the enforcement of retention policies for evicting old data.
+
+      # Determines whether retention policy enforcement enabled.
+      INFLUXDB_RETENTION_ENABLED: 'true'
+
+      # The interval of time when retention policy enforcement checks run.
+      INFLUXDB_RETENTION_CHECK_INTERVAL: 30m
+
+
+
+      ### Controls the precreation of shards, so they are available before data arrives. Only shards that, after
+      ### creation, will have both a start- and end-time in the future, will ever be created. Shards are never
+      ### precreated that would be wholly or partially in the past.
+
+      # Determines whether shard pre-creation service is enabled.
+      #INFLUXDB_SHARD_PRECREATION_ENABLED: 'true'
+
+      # The interval of time when the check to pre-create new shards runs.
+      #INFLUXDB_SHARD_PRECREATION_CHECK_INTERVAL: 10m
+
+      # The default period ahead of the endtime of a shard group that its successor group is created.
+      #INFLUXDB_SHARD_PRECREATION_ADVANCE_PERIOD: 30m
+
+
+
+      ### Controls the system self-monitoring, statistics and diagnostics. The internal database for monitoring data is
+      ### created automatically if if it does not already exist. The target retention within this database is called
+      ### 'monitor' and is also created with a retention period of 7 days and a replication factor of 1, if it does not
+      ### exist. In all cases the this retention policy is configured as the default for the database.
+
+      # Whether to record statistics internally.
+      #INFLUXDB_MONITOR_STORE_ENABLED: 'true'
+
+      # The destination database for recorded statistics
+      #INFLUXDB_MONITOR_STORE_DATABASE:_internal
+
+      # The interval at which to record statistics
+      #INFLUXDB_MONITOR_STORE_INTERVAL: 10s
+
+
+
+      ### Controls how the HTTP endpoints are configured. These are the primary mechanism for getting data into and out
+      ### of InfluxDB.
+
+      # Determines whether HTTP endpoint is enabled.
+      INFLUXDB_HTTP_ENABLED: 'true'
+
+      # Determines whether the Flux query endpoint is enabled.
+      INFLUXDB_HTTP_FLUX_ENABLED: 'true'
+
+      # The bind address used by the HTTP service.
+      INFLUXDB_HTTP_BIND_ADDRESS: 127.0.0.1:8086
+
+      # Determines whether user authentication is enabled over HTTP/HTTPS.
+      #INFLUXDB_HTTP_AUTH_ENABLED: 'false'
+
+      # The default realm sent back when issuing a basic auth challenge.
+      #INFLUXDB_HTTP_REALM: InfluxDB
+
+      # Determines whether HTTP request logging is enabled.
+      #INFLUXDB_HTTP_LOG_ENABLED: 'true'
+
+      # Determines whether the HTTP write request logs should be suppressed when the log is enabled.
+      #INFLUXDB_HTTP_SUPPRESS_WRITE_LOG: 'false'
+
+      # When HTTP request logging is enabled, this option specifies the path where log entries should be written. If
+      # unspecified, the default is to write to stderr, which intermingles HTTP logs with internal InfluxDB logging. If
+      # influxd is unable to access the specified path, it will log an error and fall back to writing the request log
+      # to stderr.
+      #INFLUXDB_HTTP_ACCESS_LOG_PATH: 
+
+      # Filters which requests should be logged. Each filter is of the pattern NNN, NNX, or NXX where N is a number and
+      # X is a wildcard for any number. To filter all 5xx responses, use the string 5xx. If multiple filters are used
+      # then only one has to match. The default is to have no filters which will cause every request to be printed.
+      #INFLUXDB_HTTP_ACCESS_LOG_STATUS_FILTERS: '[]'
+
+      # Determines whether detailed write logging is enabled.
+      #INFLUXDB_HTTP_WRITE_TRACING: 'false'
+
+      # Determines whether the pprof endpoint is enabled. This endpoint is used for
+      # troubleshooting and monitoring.
+      #INFLUXDB_HTTP_PPROF_ENABLED: 'true'
+
+      # Enables a pprof endpoint that binds to localhost:6060 immediately on startup.
+      # This is only needed to debug startup issues.
+      #INFLUXDB_HTTP_DEBUG_PPROF_ENABLED: 'false'
+
+      # Determines whether HTTPS is enabled.
+      #INFLUXDB_HTTP_HTTPS_ENABLED: 'false'
+
+      # The SSL certificate to use when HTTPS is enabled.
+      #INFLUXDB_HTTP_HTTPS_CERTIFICATE: /etc/ssl/influxdb.pem
+
+      # Use a separate private key location.
+      #INFLUXDB_HTTP_HTTPS_PRIVATE_KEY: 
+
+      # The JWT auth shared secret to validate requests using JSON web tokens.
+      #INFLUXDB_HTTP_SHARED_SECRET: 
+
+      # The default chunk size for result sets that should be chunked.
+      #INFLUXDB_HTTP_MAX_ROW_LIMIT: 0
+
+      # The maximum number of HTTP connections that may be open at once. New connections that would exceed this limit
+      # are dropped. Setting this value to 0 disables the limit.
+      #INFLUXDB_HTTP_MAX_CONNECTION_LIMIT: 0
+
+      # Enable http service over unix domain socket
+      #INFLUXDB_HTTP_UNIX_SOCKET_ENABLED: 'false'
+
+      # The path of the unix domain socket.
+      #INFLUXDB_HTTP_BIND_SOCKET: /var/run/influxdb.sock
+
+      # The maximum size of a client request body, in bytes. Setting this value to 0 disables the limit.
+      #INFLUXDB_HTTP_MAX_BODY_SIZE: 25000000
+
+      # The maximum number of writes processed concurrently. Setting this to 0 disables the limit.
+      #INFLUXDB_HTTP_MAX_CONCURRENT_WRITE_LIMIT: 0
+
+      # The maximum number of writes queued for processing. Setting this to 0 disables the limit.
+      #INFLUXDB_HTTP_MAX_ENQUEUED_WRITE_LIMIT: 0
+
+      # The maximum duration for a write to wait in the queue to be processed.
+      # Setting this to 0 or setting max-concurrent-write-limit to 0 disables the limit.
+      #INFLUXDB_HTTP_ENQUEUED_WRITE_TIMEOUT: 0
+
+
+
+      ### Controls how the logger emits logs to the output.
+
+      # Determines which log encoder to use for logs. Available options are auto, logfmt, and json. auto will use a
+      # more a more user-friendly output format if the output terminal is a TTY, but the format is not as easily
+      # machine-readable. When the output is a non-TTY, auto will use logfmt.
+      #INFLUXDB_LOGGING_FORMAT: auto
+
+      # Determines which level of logs will be emitted. The available levels are error, warn, info, and debug. Logs
+      # that are equal to or above the specified level will be emitted.
+      #INFLUXDB_LOGGING_LEVEL: info
+
+      # Suppresses the logo output that is printed when the program is started. The logo is always suppressed if STDOUT
+      # is not a TTY.
+      INFLUXDB_LOGGING_SUPPRESS_LOGO: 'true'
+
+
+
+      ### Controls the subscriptions, which can be used to fork a copy of all data received by the InfluxDB host.
+
+      # Determines whether the subscriber service is enabled.
+      #INFLUXDB_SUBSCRIBER_ENABLED: 'true'
+
+      # The default timeout for HTTP writes to subscribers.
+      #INFLUXDB_SUBSCRIBER_HTTP_TIMEOUT: 30s
+
+      # Allows insecure HTTPS connections to subscribers. This is useful when testing with self-signed certificates.
+      #INFLUXDB_SUBSCRIBER_INSECURE_SKIP_VERIFY: 'false'
+
+      # The path to the PEM encoded CA certs file. If the empty string, the default system certs will be used
+      #INFLUXDB_SUBSCRIBER_CA_CERTS: 
+
+      # The number of writer goroutines processing the write channel.
+      #INFLUXDB_SUBSCRIBER_WRITE_CONCURRENCY: 40
+
+      # The number of in-flight writes buffered in the write channel.
+      #INFLUXDB_SUBSCRIBER_WRITE_BUFFER_SIZE: 1000
+
+
+
+      ### Controls how continuous queries are run within InfluxDB.
+
+      # Determines whether the continuous query service is enabled.
+      #INFLUXDB_CONTINUOUS_QUERIES_ENABLED: 'true'
+
+      # Controls whether queries are logged when executed by the CQ service.
+      #INFLUXDB_CONTINUOUS_QUERIES_LOG_ENABLED: 'true'
+
+      # Controls whether queries are logged to the self-monitoring data store.
+      #INFLUXDB_CONTINUOUS_QUERIES_QUERY_STATS_ENABLED: 'false'
+
+      # interval for how often continuous queries will be checked if they need to run
+      #INFLUXDB_CONTINUOUS_QUERIES_RUN_INTERVAL: 1s
+
+
+
+      ### Global configuration settings for TLS in InfluxDB.
+
+      # Determines the available set of cipher suites. See https://golang.org/pkg/crypto/tls/#pkg-constants for a list
+      # of available ciphers, which depends on the version of Go (use the query SHOW DIAGNOSTICS to see the version of
+      # Go used to build InfluxDB). If not specified, uses the default settings from Go's crypto/tls package.
+      #INFLUXDB_TLS_CIPHERS: '["TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305","TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"]'
+
+      # Minimum version of the tls protocol that will be negotiated. If not specified, uses the
+      # default settings from Go's crypto/tls package.
+      #INFLUXDB_TLS_MIN_VERSION: tls1.2
+
+      # Maximum version of the tls protocol that will be negotiated. If not specified, uses the
+      # default settings from Go's crypto/tls package.
+      #INFLUXDB_TLS_MAX_VERSION: tls1.2

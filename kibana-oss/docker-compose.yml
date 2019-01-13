@@ -1,0 +1,40 @@
+#------------------------------------------------------------------------------
+# Copyright 2019 Robert Cowart
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#------------------------------------------------------------------------------
+
+version: '3'
+services:
+  kibana-oss:
+    image: docker.elastic.co/kibana/kibana-oss:6.5.4
+    container_name: kibana-oss
+    restart: unless-stopped
+    hostname: kibana
+    network_mode: bridge
+    ports:
+      - 5601:5601/tcp
+    environment:
+      SERVER_NAME: localhost
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 5601
+      SERVER_MAXPAYLOADBYTES: 4194304
+
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+
+      LOGGING_DEST: stdout
+      #LOGGING_FALSE: 'false'
+      LOGGING_QUIET: 'true'
+      #LOGGING_VERBOSE: 'false'
+
+      VEGA: '{"enableExternalUrls": true}'

@@ -1,0 +1,618 @@
+#------------------------------------------------------------------------------
+# Copyright 2019 Robert Cowart
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#------------------------------------------------------------------------------
+
+version: '3'
+services:
+  kapacitor:
+    image: kapacitor:1.5.2
+    container_name: kapacitor
+    restart: unless-stopped
+    hostname: kapacitor
+    network_mode: bridge
+    ports:
+      - 9092:9092/tcp
+    volumes:
+      - /var/lib/kapacitor:/var/lib/kapacitor
+    environment:
+      ### Kapacitor Basic Properties
+      
+      # Must be resolvable by any configured InfluxDB hosts.
+      KAPACITOR_HOSTNAME: 127.0.0.1
+      
+      # Directory for storing a small amount of metadata about the server.
+      KAPACITOR_DATA_DIR: /var/lib/kapacitor
+      
+      # Boolean indicating whether or not to skip configuration overrides.
+      #KAPACITOR_SKIP_CONFIG_OVERRIDES: 'false'
+      
+      # Default retention-policy, if a write is made to Kapacitor and it does not have a retention policy associated
+      # with it, then the retention policy will be set to this value.
+      #KAPACITOR_DEFAULT_RETENTION_POLICY: 
+
+      # HTTP API Server for Kapacitor. This server is always on, it serves both as a write endpoint and as the API
+      # endpoint for all other Kapacitor calls.
+      KAPACITOR_HTTP_BIND_ADDRESS: 127.0.0.1:9092
+      KAPACITOR_HTTP_LOG_ENABLED: 'true'
+      #KAPACITOR_HTTP_WRITE_TRACING: 'false'
+      #KAPACITOR_HTTP_PPROF_ENABLED: 'false'
+
+      KAPACITOR_HTTP_HTTPS_ENABLED: 'false'
+      #KAPACITOR_HTTP_HTTPS_CERTIFICATE: /etc/ssl/kapacitor.pem
+      #KAPACITOR_HTTP_HTTPS_PRIVATE_KEY: 
+
+      # Enable/Disable the service for overridding configuration via the HTTP API.
+      KAPACITOR_CONFIG_OVERRIDE_ENABLED: 'true'
+
+      # Destination for logs. Can be a path to a file or 'STDOUT', 'STDERR'.
+      #KAPACITOR_LOGGING_FILE: STDOUT
+      
+      # Logging level can be one of: DEBUG, INFO, ERROR
+      #KAPACITOR_LOGGING_LEVEL: INFO
+
+      # Enable/Disable the service for loading tasks/templates/handlers from a directory.
+      #KAPACITOR_LOAD_ENABLED: 'true'
+      
+      # Directory where task/template/handler files are set
+      #KAPACITOR_LOAD_DIR: /etc/kapacitor/load
+
+      # Where to store replay files, aka recordings.
+      #KAPACITOR_REPLAY_DIR: /var/lib/kapacitor/replay
+
+      # Where to store the tasks database
+      # DEPRECATED: This option is not needed for new installations. It is only used to determine the location of the
+      # task.db file for migrating to the new `storage` service.
+      #KAPACITOR_TASK_DIR: /var/lib/kapacitor/tasks
+      
+      # How often to snapshot running task state.
+      #KAPACITOR_TASK_SNAPSHOT_INTERVAL: 60s
+
+      # Where to store the Kapacitor boltdb database
+      KAPACITOR_STORAGE_BOLTDB: /var/lib/kapacitor/kapacitor.db
+
+      # Globally configure deadman's switches on all tasks.
+      # NOTE: for this to be of use you must also globally configure at least one alerting method.
+      #KAPACITOR_DEADMAN_GLOBAL: 'false'
+      
+      # Threshold, if globally configured the alert will be triggered if the throughput in points/interval is
+      # <= threshold.
+      #KAPACITOR_DEADMAN_THRESHOLD: 0.0
+      
+      # Interval, if globally configured the frequency at which to check the throughput.
+      #KAPACITOR_DEADMAN_INTERVAL: 10s
+      
+      # The alert ID. NODE_NAME will be replaced with the name of the node being monitored.
+      #KAPACITOR_DEADMAN_ID: "node 'NODE_NAME' in task '{{ .TaskName }}'"
+      
+      # The message of the alert. INTERVAL will be replaced by the interval.
+      #KAPACITOR_DEADMAN_MESSAGE: '{{ .ID }} is {{ if eq .Level \"OK\" }}alive{{ else }}dead{{ end }}: {{ index .Fields \"collected\" | printf \"%0.3f\" }} points/INTERVAL.'
+
+      
+      
+      ### InfluxDB
+      
+      # Connect to an InfluxDB cluster. Multiple InfluxDB configurations can be defined. Kapacitor can subscribe, query
+      # and write to this cluster. Using InfluxDB is not required and can be disabled. Exactly one must be marked as
+      # the default. Each one will be given a name and can be referenced in batch queries and InfluxDBOut nodes.
+      KAPACITOR_INFLUXDB_0_ENABLED: 'true'
+      KAPACITOR_INFLUXDB_0_DEFAULT: 'true'
+      KAPACITOR_INFLUXDB_0_NAME: 'localhost'
+      KAPACITOR_INFLUXDB_0_URLS_0: http://192.2.0.1:8086
+      #KAPACITOR_INFLUXDB_0_USERNAME: 
+      #KAPACITOR_INFLUXDB_0_PASSWORD: 
+      #KAPACITOR_INFLUXDB_0_TIMEOUT: 0
+      #KAPACITOR_INFLUXDB_0_SSL_CA: /etc/kapacitor/ca.pem
+      #KAPACITOR_INFLUXDB_0_SSL_CERT: /etc/kapacitor/cert.pem
+      #KAPACITOR_INFLUXDB_0_SSL_KEY: /etc/kapacitor/key.pem
+
+      # Do not verify the TLS/SSL certificate. This is insecure.
+      #KAPACITOR_INFLUXDB_0_INSECURE_SKIP_VERIFY: 'false'
+
+      # Maximum time to try and connect to InfluxDB during startup
+      #KAPACITOR_INFLUXDB_0_STARTUP_TIMEOUT: 5m
+
+      # Turn off all subscriptions
+      #KAPACITOR_INFLUXDB_0_DISABLE_SUBSCRIPTIONS: 'false'
+      
+      # Subscription mode is either "cluster" or "server"
+      #KAPACITOR_INFLUXDB_0_SUBSCRIPTION_MODE: cluster
+      
+      # Which protocol to use for subscriptions. One of 'udp', 'http', or 'https'.
+      #KAPACITOR_INFLUXDB_0_SUBSCRIPTION_PROTOCOL: http
+      
+      # Subscriptions resync time interval. Useful if you want to subscribe to new created databases without restart
+      # Kapacitord
+      #KAPACITOR_INFLUXDB_0_SUBSCRIPTIONS_SYNC_INTERVAL: 1m0s
+
+      # Override the global hostname option for this InfluxDB cluster. Useful if the InfluxDB cluster is in a separate
+      # network and needs special config to connect back to this Kapacitor instance. Defaults to `hostname` if empty.
+      KAPACITOR_INFLUXDB_0_KAPACITOR_HOSTNAME: knode1
+
+      # Override the global http port option for this InfluxDB cluster. Useful if the InfluxDB cluster is in a separate
+      # network and needs special config to connect back to this Kapacitor instance. Defaults to the port from
+      # `[http] bind-address` if 0.
+      #KAPACITOR_INFLUXDB_0_HTTP_PORT: 0
+
+      # Host part of a bind address for UDP listeners. For example if a UDP listener is using port 1234 and
+      # `udp-bind = "hostname_or_ip"`, then the UDP port will be bound to `hostname_or_ip:1234` The default empty value
+      # will bind to all addresses.
+      #KAPACITOR_INFLUXDB_0_UDP_BIND: 
+      
+      # Subscriptions use the UDP network protocl. The following options are for the created UDP listeners for each
+      # subscription. Number of packets to buffer when reading packets off the socket.
+      #KAPACITOR_INFLUXDB_0_UDP_BUFFER: 1000
+      
+      # The size in bytes of the OS read buffer for the UDP socket. A value of 0 indicates use the OS default.
+      #KAPACITOR_INFLUXDB_0_UDP_READ_BUFFER: 0
+
+      
+      
+      ### kubernetes
+      
+      # Enable/Disable the kubernetes service. Needed by the k8sAutoscale TICKscript node.
+      #KAPACITOR_KUBERNETES_ENABLED: 'false'
+      
+      # There are several ways to connect to the kubernetes API servers:
+      # Via the proxy, start the proxy via the `kubectl proxy` command:
+      #KAPACITOR_KUBERNETES_API_SERVERS: '["http://localhost:8001"]'
+      
+      # From within the cluster itself, in which case kubernetes secrets and DNS services are used to determine the
+      # needed configuration.
+      #KAPACITOR_KUBERNETES_IN_CLUSTER: 'true'
+      
+      # Direct connection, in which case you need to know the URL of the API servers, the authentication token and the
+      # path to the ca cert bundle. These value can be found using the `kubectl config view` command.
+      #KAPACITOR_KUBERNETES_API_SERVERS: '["http://192.168.99.100:8443"]'
+      #KAPACITOR_KUBERNETES_TOKEN: '...'
+      #KAPACITOR_KUBERNETES_CA_PATH: /path/to/kubernetes/ca.crt
+      
+      # Kubernetes can also serve as a discoverer for scrape targets. In that case the type of resources to discoverer
+      # must be specified. Valid values are: "node", "pod", "service", and "endpoint".
+      #KAPACITOR_KUBERNETES_resource = "pod"
+
+      
+      
+      ### SMTP email server
+
+      # Configure an SMTP email server. Will use TLS and authentication if possible. Only necessary for sending emails
+      # from alerts.
+      #KAPACITOR_SMTP_ENABLED: 'false'
+      #KAPACITOR_SMTP_HOST: 'localhost'
+      #KAPACITOR_SMTP_PORT: 25
+      #KAPACITOR_SMTP_USERNAME: 
+      #KAPACITOR_SMTP_PASSWORD: 
+      
+      # From address for outgoing mail
+      #KAPACITOR_SMTP_FROM: 
+      
+      # List of default To addresses.
+      #KAPACITOR_SMTP_TO: '["oncall@example.com"]'
+      
+      # Skip TLS certificate verify when connecting to SMTP server.
+      #KAPACITOR_SMTP_NO_VERIFY: 'false'
+      
+      # Close idle connections after timeout
+      #KAPACITOR_SMTP_IDLE_TIMEOUT: 30s
+      
+      # If true the all alerts will be sent via Email without explicitly marking them in the TICKscript.
+      #KAPACITOR_SMTP_GLOBAL: 'false'
+      
+      # Only applies if global is true. Sets all alerts in state-changes-only mode, meaning alerts will only be sent if
+      # the alert state changes.
+      #KAPACITOR_SMTP_STATE_CHANGES_ONLY: 'false'
+
+      
+      
+      ### SNMP trap
+
+      # Configure an SNMP trap server
+      KAPACITOR_SNMPTRAP_ENABLED: 'true'
+      
+      # The host:port address of the SNMP trap server
+      KAPACITOR_SNMPTRAP_ADDR: 192.2.0.1:162
+      
+      # The community to use for traps
+      KAPACITOR_SNMPTRAP_COMMUNITY: public
+      
+      # Number of retries when sending traps
+      KAPACITOR_SNMPTRAP_RETRIES: 1
+
+      
+      
+      ### OpsGenie
+
+      # Configure OpsGenie with your API key
+      #KAPACITOR_OPSGENIE_ENABLED: 'false'
+      
+      # Your OpsGenie API Key.
+      #KAPACITOR_OPSGENIE_API_KEY: 
+      
+      # Default OpsGenie teams, can be overridden per alert.
+      #KAPACITOR_OPSGENIE_TEAMS: '["team1", "team2"]'
+      
+      # Default OpsGenie recipients, can be overridden per alert.
+      #KAPACITOR_OPSGENIE_RECIPIENTS: '["recipient1", "recipient2"]'
+      
+      # The OpsGenie API URL should not need to be changed.
+      #KAPACITOR_OPSGENIE_URL: https://api.opsgenie.com/v1/json/alert
+      
+      # The OpsGenie Recovery URL, you can change this based on which behavior you want a recovery to trigger (Add
+      # Notes, Close Alert, etc.)
+      #KAPACITOR_OPSGENIE_RECOVERY_URL: https://api.opsgenie.com/v1/json/alert/note
+      
+      # If true then all alerts will be sent to OpsGenie without explicitly marking them in the TICKscript. The team
+      # and recipients can still be overridden.
+      #KAPACITOR_OPSGENIE_GLOBAL: 'false'
+
+      
+      
+      ### OpsGenie v2
+
+      # Configure OpsGenie v2 with your API key
+      #KAPACITOR_OPSGENIE2_ENABLED: 'false'
+      
+      # Your OpsGenie API Key.
+      #KAPACITOR_OPSGENIE2_API_KEY: 
+      
+      # Default OpsGenie teams, can be overridden per alert.
+      #KAPACITOR_OPSGENIE2_TEAMS: '["team1", "team2"]'
+      
+      # Default OpsGenie recipients, can be overridden per alert.
+      #KAPACITOR_OPSGENIE2_RECIPIENTS: '["recipient1", "recipient2"]'
+      
+      # The OpsGenie API URL should not need to be changed.
+      #KAPACITOR_OPSGENIE2_URL: https://api.opsgenie.com/v2/alerts
+      
+      # The Recovery Action specifies which action to take when alerts recover. Valid values include:
+      #   * notes - add a note to the alert
+      #   * close - close the alert
+      #KAPACITOR_OPSGENIE_RECOVERY_ACTION: notes
+      
+      # If true then all alerts will be sent to OpsGenie without explicitly marking them in the TICKscript. The team
+      # and recipients can still be overridden.
+      #KAPACITOR_OPSGENIE2_GLOBAL: 'false'
+
+      
+      
+      ### VictorOps
+
+      # Configure VictorOps with your API key and default routing key.
+      #KAPACITOR_VICTOROPS_ENABLED: 'false'
+      
+      # Your VictorOps API Key.
+      #KAPACITOR_VICTOROPS_API_KEY: 
+      
+      # Default VictorOps routing key, can be overridden per alert.
+      #KAPACITOR_VICTOROPS_ROUTING_KEY: 
+      
+      # The VictorOps API URL should not need to be changed.
+      #KAPACITOR_VICTOROPS_URL: https://alert.victorops.com/integrations/generic/20131114/alert
+      
+      # If true the all alerts will be sent to VictorOps without explicitly marking them in the TICKscript. The routing
+      # key can still be overridden.
+      #KAPACITOR_VICTOROPS_GLOBAL: 'false'
+      
+      # Use JSON for the "data" field New installations will want to set this to true as it makes the data that
+      # triggered the alert available within VictorOps. The default is "false" for backwards compatibility reasons.
+      #KAPACITOR_VICTOROPS_JSON_DATA: 'false'
+
+      
+      
+      ### PagerDuty
+
+      # Configure PagerDuty.
+      #KAPACITOR_PAGERDUTY_ENABLED: 'false'
+      
+      # Your PagerDuty Service Key.
+      #KAPACITOR_PAGERDUTY_SERVICE_KEY: 
+      
+      # The PagerDuty API URL should not need to be changed.
+      #KAPACITOR_PAGERDUTY_URL: https://events.pagerduty.com/generic/2010-04-15/create_event.json
+      
+      # If true the all alerts will be sent to PagerDuty without explicitly marking them in the TICKscript.
+      #KAPACITOR_PAGERDUTY_GLOBAL: 'false'
+
+      
+      
+      ### PagerDuty API v2
+
+      # Configure PagerDuty API v2.
+      #KAPACITOR_PAGERDUTY2_ENABLED: 'false' 
+      
+      # Your PagerDuty Routing Key.
+      #KAPACITOR_PAGERDUTY2_ROUTING_KEY: 
+      
+      # The PagerDuty API v2 URL should not need to be changed.
+      #KAPACITOR_PAGERDUTY2_URL: https://events.pagerduty.com/v2/enqueue
+      
+      # If true the all alerts will be sent to PagerDuty without explicitly marking them in the TICKscript.
+      #KAPACITOR_PAGERDUTY2_GLOBAL: 'false'
+
+      
+      
+      ### Pushover
+
+      # Configure Pushover.
+      #KAPACITOR_PUSHOVER_ENABLED: 'false'
+      
+      # Your Pushover API token.
+      #KAPACITOR_PUSHOVER_TOKEN: 
+      
+      # Your Pushover USER_TOKEN.
+      #KAPACITOR_PUSHOVER_USER_KEY: 
+      
+      # The URL for the Pushover API.
+      #KAPACITOR_PUSHOVER_URL: https://api.pushover.net/1/messages.json
+
+      
+      
+      ### HTTP POST
+      
+      #KAPACITOR_HTTPPOST_0_ENDPOINT: example
+      
+      #KAPACITOR_HTTPPOST_0_URL: http://example.com
+      
+      #KAPACITOR_HTTPPOST_0_HEADERS_Example: your-key
+      
+      #KAPACITOR_HTTPPOST_0_BASIC_AUTH_username: my-user
+      
+      #KAPACITOR_HTTPPOST_0_BASIC_AUTH_password: my-pass
+      
+      # Provide an alert template for constructing a custom HTTP body. Alert templates are only used with post alert
+      # handlers as they consume alert data. The template uses https://golang.org/pkg/text/template/ and has access to
+      # the following fields:
+      #   * .ID - The unique ID for this alert
+      #   * .Message - The message of the alert
+      #   * .Details - The details of the alert
+      #   * .Time - The time the alert event occurred
+      #   * .Duration - The duration of the alert event.
+      #   * .Level - The level of the alert, i.e INFO, WARN, or CRITICAL.
+      #   * .Data - The data that triggered the alert.
+      # Specify the template inline.
+      #KAPACITOR_HTTPPOST_0_ALERT_TEMPLATE: '{{.Message}}:{{range .Data.Series}}{{.Tags}},{{range .Values}}{{.}}{{end}}{{end}}'
+      
+      # Specify an absolute path to a template file.
+      #KAPACITOR_HTTPPOST_0_ALERT_TEMPLATE_FILE: /path/to/template/file
+      
+      # Provide a row template for constructing a custom HTTP body. Row templates are only used with httpPost pipeline
+      # nodes as they consume a row at a time. The template uses https://golang.org/pkg/text/template/ and has access
+      # to the following fields:
+      #   * .Name - The measurement name of the data stream
+      #   * .Tags - A map of tags on the data.
+      #   * .Values - A list of values, each entry is a map containing a "time" key for the time of the point and keys
+      #               for all other fields on the point.
+      # Specify the template inline.
+      #KAPACITOR_HTTPPOST_0_ROW_TEMPLATE: '{{.Name}} host={{index .Tags \"host\"}}{{range .Values}} {{index . "time"}} {{index . "value"}}{{end}}'
+      
+      # Specify an absolute path to a template file.
+      #KAPACITOR_HTTPPOST_0_ROW_TEMPLATE_FILE: /path/to/template/file
+
+      
+      
+      # Slack
+
+      # Slack client configuration. Mutliple different clients may be configured by repeating [[slack]] sections.
+      #KAPACITOR_SLACK_0_ENABLED: 'false'
+      
+      # identify one of the slack configurations as the default
+      #KAPACITOR_SLACK_0_DEFAULT: 'true'
+      
+      # workspace ID. This can be any string to identify this particular slack configuration. A logical choice is the
+      # name of the slack workspace, e.g. <workspace>.slack.com
+      #KAPACITOR_SLACK_0_WORKSPACE: 
+      
+      # The Slack webhook URL, can be obtained by adding an Incoming Webhook integration. Visit
+      # https://slack.com/services/new/incoming-webhook to add new webhook for Kapacitor.
+      #KAPACITOR_SLACK_0_URL: 
+      
+      # Default channel for messages
+      #KAPACITOR_SLACK_0_CHNNEL: 
+      
+      # If true all the alerts will be sent to Slack without explicitly marking them in the TICKscript.
+      #KAPACITOR_SLACK_0_GLOBAL: 'false'
+      
+      # Only applies if global is true. Sets all alerts in state-changes-only mode, meaning alerts will only be sent if
+      # the alert state changes.
+      #KAPACITOR_SLACK_0_STATE_CHANGES_ONLY: 'false'
+
+      
+      
+      ### Telegram
+
+      # Configure Telegram.
+      #KAPACITOR_TELEGRAM_ENABLED: 'false'
+      
+      # The Telegram Bot URL should not need to be changed.
+      #KAPACITOR_TELEGRAM_URL: https://api.telegram.org/bot
+      
+      # Telegram Bot Token, can be obtained From @BotFather.
+      #KAPACITOR_TELEGRAM_TOKEN: 
+      
+      # Default recipient for messages, Contact @myidbot on Telegram to get an ID.
+      #KAPACITOR_TELEGRAM_CHAT_ID: 
+      
+      # Send Markdown or HTML, if you want Telegram apps to show bold, italic, fixed-width text or inline URLs in your
+      # alert message.
+      #KAPACITOR_TELEGRAM_PARSE_MODE: Markdown
+      
+      # Disable link previews for links in this message
+      #KAPACITOR_TELEGRAM_DISABLE_WEB_PAGE_PREVIEW: 'false'
+      
+      # Sends the message silently. iOS users will not receive a notification, Android users will receive a
+      # notification with no sound.
+      #KAPACITOR_TELEGRAM_DISABLE_NOTIFICATION: 'false'
+      
+      # If true the all alerts will be sent to Telegram without explicitly marking them in the TICKscript.
+      #KAPACITOR_TELEGRAM_GLOBAL: 'false'
+      
+      # Only applies if global is true. Sets all alerts in state-changes-only mode, meaning alerts will only be sent if
+      # the alert state changes.
+      #KAPACITOR_TELEGRAM_STATE_CHANGES_ONLY: 'false'
+
+      
+      
+      ### HipChat
+
+      # Configure HipChat.
+      #KAPACITOR_HIPCHAT_ENABLED: 'false'
+      
+      # The HipChat API URL. Replace subdomain with your HipChat subdomain.
+      #KAPACITOR_HIPCHAT_URL: https://subdomain.hipchat.com/v2/room
+      
+      # Default room for messages
+      #KAPACITOR_HIPCHAT_ROOM: 
+      
+      # Default authentication token
+      #KAPACITOR_HIPCHAT_TOKEN: 
+      
+      # If true then all alerts will be sent to HipChat without explicitly marking them in the TICKscript.
+      #KAPACITOR_HIPCHAT_GLOBAL: 'false'
+      
+      # Only applies if global is true. Sets all alerts in state-changes-only mode, meaning alerts will only be sent if
+      # the alert state changes.
+      #KAPACITOR_HIPCHAT_STATE_CHANGES_ONLY: 'false'
+
+      
+      
+      ### Kafka
+
+      # Configure Kafka
+      #KAPACITOR_KAFKA_0_ENABLED: 'false'
+      
+      # ID is a unique identifier for this kafka cluster.
+      #KAPACITOR_KAFKA_0_ID: localhost
+      
+      # Brokers is a list of host:port addresses of Kafka brokers.
+      #KAPACITOR_KAFKA_0_BROKERS: '[]'
+      
+      # Timeout on network operations with the brokers. If 0 a default of 10s will be used.
+      #KAPACITOR_KAFKA_0_TIMEOUT: 10s
+      
+      # BatchSize is the number of messages that are batched before being sent to Kafka. If 0 a default of 100 will be
+      # used.
+      #KAPACITOR_KAFKA_0_BATCH_SIZE: 100
+      
+      # BatchTimeout is the maximum amount of time to wait before flushing an incomplete batch. If 0 a default of 1s
+      # will be used.
+      #KAPACITOR_KAFKA_0_BATCH_TIMEOUT: 1s
+      
+      # Use SSL enables ssl communication. Must be true for the other ssl options to take effect.
+      #KAPACITOR_KAFKA_0_USE_SSL: 'false'
+      
+      # Path to CA file
+      #KAPACITOR_KAFKA_0_SSL_CA: 
+      
+      # Path to host cert file
+      #KAPACITOR_KAFKA_0_SSL_CERT: 
+      
+      # Path to cert key file
+      #KAPACITOR_KAFKA_0_SSL_KEY: 
+      
+      # Use SSL but skip chain & host verification
+      #KAPACITOR_KAFKA_0_INSECURE_SKIP_VERIFY: 'false'
+
+
+      
+      ### Alerta
+      
+      # Configure Alerta.
+      #KAPACITOR_ALERTA_ENABLED: 'false'
+      
+      # The Alerta URL.
+      #KAPACITOR_ALERTA_URL: 
+      
+      # Default authentication token.
+      #KAPACITOR_ALERTA_TOKEN: 
+      
+      # Default token prefix. If you are on older versions of alerta you may need to change this to "Key".
+      #KAPACITOR_ALERTA_TOKEN_PREFIX: Bearer
+      
+      # Default environment.
+      #KAPACITOR_ALERTA_ENVIRONMENT: 
+      
+      # Default origin.
+      #KAPACITOR_ALERTA_ORIGIN: kapacitor
+
+
+
+      ### Sensu
+
+      # Configure Sensu.
+      #KAPACITOR_SENSU_ENABLED: 'false'
+      
+      # The Sensu Client host:port address.
+      #KAPACITOR_SENSU_ADDR: sensu-client:3030
+      
+      # Default JIT source.
+      #KAPACITOR_SENSU_SOURCE: Kapacitor
+
+
+
+      ### Stats
+
+      # Send usage statistics every 12 hours to Enterprise.
+      KAPACITOR_REPORTING_ENABLED: 'false'
+      #KAPACITOR_REPORTING_URL: https://usage.influxdata.com
+
+      # Emit internal statistics about Kapacitor. To consume these stats create a stream task that selects data from
+      # the configured database and retention policy.
+      # Example:
+      #   stream|from().database('_kapacitor').retentionPolicy('autogen')...
+      KAPACITOR_STATS_ENABLED: 'true'
+      KAPACITOR_STATS_STATS_INTERVAL: 10s
+      KAPACITOR_STATS_DATABASE: _kapacitor
+      KAPACITOR_STATS_RETENTION_POLICY: autogen
+
+      # Configure Talk.
+      #KAPACITOR_TALK_ENABLED: 'false'
+      # The Talk webhook URL.
+      #KAPACITOR_TALK_URL: https://jianliao.com/v2/services/webhook/uuid
+      # The default authorName.
+      #KAPACITOR_TALK_AUTHOR_NAME: Kapacitor
+
+      
+      
+      ### MQTT
+
+      # MQTT client configuration. Mutliple different clients may be configured.
+      #KAPACITOR_MQTT_0_ENABLED: 'false'
+
+      # Unique name for this broker configuration
+      #KAPACITOR_MQTT_0_NAME: localhost
+      
+      # Whether this broker configuration is the default
+      #KAPACITOR_MQTT_0_DEFAULT: 'true'
+      
+      # URL of the MQTT broker. Possible protocols include:
+      #   tcp - Raw TCP network connection
+      #   ssl - TLS protected TCP network connection
+      #   ws  - Websocket network connection
+      #KAPACITOR_MQTT_0_URL: "tcp://localhost:1883"
+      
+      # TLS/SSL configuration. A CA can be provided without a key/cert pair
+      #KAPACITOR_MQTT_SSL_CA: /etc/kapacitor/ca.pem
+      
+      # Absolutes paths to pem encoded key and cert files.
+      #KAPACITOR_MQTT_SSL_CERT: /etc/kapacitor/cert.pem
+      #KAPACITOR_MQTT_SSL_KEY: /etc/kapacitor/key.pem
+      
+      # Unique ID for this MQTT client. If empty used the value of "name"
+      #KAPACITOR_MQTT_0_CLIENT_ID: 
+      
+      # MQTT Username
+      #KAPACITOR_MQTT_0_USERNAME: ""
+      
+      # MQTT Password
+      #KAPACITOR_MQTT_0_PASSWORD: ""

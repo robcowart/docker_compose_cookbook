@@ -1,0 +1,856 @@
+#------------------------------------------------------------------------------
+# Copyright 2019 Robert Cowart
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#------------------------------------------------------------------------------
+
+version: '3'
+services:
+  kafka:
+    image: confluentinc/cp-kafka:5.1.0-1
+    container_name: kafka
+    restart: unless-stopped
+    hostname: kafka
+    network_mode: bridge
+    ports:
+      # kafka broker listener
+      - 9092:9092
+      # JMX
+      - 10030:10030
+    volumes:
+      - /var/lib/kafka/data:/var/lib/kafka/data
+      - /var/log/kafka:/var/log/kafka
+    environment:
+      # JVM heap size.
+      KAFKA_HEAP_OPTS: '-Xms4g -Xmx4g'
+
+      # JMX Settings.
+      KAFKA_JMX_HOSTNAME: 127.0.0.1
+      KAFKA_JMX_PORT: 10030
+      #KAFKA_JMX_OPTS: '-Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=10030 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false'
+
+      # A comma seperated list of directories under which to store log files
+      LOG_DIR: /var/log/kafka
+
+      # The directory where ZooKeeper data will be stored.
+      KAFKA_DATA_DIR: /var/lib/kafka
+
+
+
+      # Listeners to publish to ZooKeeper for clients to use, if different than the listeners config property. In IaaS
+      # environments, this may need to be different from the interface to which the broker binds. If this is not set,
+      # the value for listeners will be used. Unlike listeners it is not valid to advertise the 0.0.0.0 meta-address.
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9092
+
+      
+      
+      # The alter configs policy class that should be used for validation. The class should implement the
+      # org.apache.kafka.server.policy.AlterConfigPolicy interface.
+      #KAFKA_ALTER_CONFIG_POLICY_CLASS_NAME: null
+
+      # The number of samples to retain in memory for alter log dirs replication quotas.
+      #KAFKA_ALTER_LOG_DIRS_REPLICATION_QUOTA_WINDOW_NUM: 11
+
+      # The time span of each sample for alter log dirs replication quotas.
+      #KAFKA_ALTER_LOG_DIRS_REPLICATION_QUOTA_WINDOW_SIZE_SECONDS: 1
+
+
+
+      # The authorizer class that should be used for authorization.
+      #KAFKA_AUTHORIZER_CLASS_NAME: 
+      
+      
+      
+      # Enable auto creation of topic on the server.
+      #KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+
+      # Enables auto leader balancing. A background thread checks and triggers leader balance if required at regular intervals.
+      #KAFKA_AUTO_LEADER_REBALANCE_ENABLE: 'true'
+      
+      
+      
+      # The number of threads to use for various background processing tasks.
+      #KAFKA_BACKGROUND_THREADS: 10
+      
+      
+      
+      # The broker id for this server. If unset, a unique broker id will be generated. To avoid conflicts between
+      # zookeeper generated broker id's and user configured broker id's, generated broker ids start from
+      # reserved.broker_MAX_id + 1.
+      KAFKA_BROKER_ID: -1
+
+      # Enable automatic broker id generation on the server. When enabled the value configured for
+      # reserved.broker.max.id should be reviewed.
+      #KAFKA_BROKER_ID_GENERATION_ENABLE: 'true'
+      
+      # Rack of the broker. This will be used in rack aware replication assignment for fault tolerance. Examples:
+      # `RACK1`, `us-east-1d`
+      #KAFKA_BROKER_RACK: null
+      
+      
+      
+      # The fully qualified name of a class that implements the ClientQuotaCallback interface, which is used to
+      # determine quota limits applied to client requests. By default, , or quotas stored in ZooKeeper are applied.
+      # For any given request, the most specific quota that matches the user principal of the session and the
+      # client-id of the request is applied.
+      #KAFKA_CLIENT_QUOTA_CALLBACK_CLASS: null
+      
+      
+      
+      # Specify the final compression type for a given topic. This configuration accepts the standard compression
+      # codecs ('gzip', 'snappy', 'lz4', 'zstd'). It additionally accepts 'uncompressed' which is equivalent to no
+      # compression; and 'producer' which means retain the original compression codec set by the producer.
+      #KAFKA_COMPRESSION_TYPE: producer
+      
+      
+      
+      # Uncomment the following lines to publish monitoring data for Confluent Control Center and Confluent Auto Data
+      # Balancer.
+      #KAFKA_CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: localhost:9092
+
+      # Uncomment the following line if the metrics cluster has a single broker
+      #KAFKA_CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+
+      # If set to true, and confluent-support-metrics package is installed then the feature to collect and report
+      # support metrics ("Metrics") is enabled.
+      KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: 'false'
+
+      # The customer ID under which support metrics will be collected and reported.
+      #KAFKA_CONFLUENT_SUPPORT_CUSTOMER_ID: anonymous
+
+      
+      
+      # Connection close delay on failed authentication: this is the time (in milliseconds) by which connection close
+      # will be delayed on authentication failure. This must be configured to be less than connections.max.idle.ms to
+      # prevent connection timeout.
+      #KAFKA_CONNECTION_FAILED_AUTHENTICATION_DELAY_MS: 100
+
+
+
+      # Idle connections timeout. the server socket processor threads close the connections that idle more than this.
+      #KAFKA_CONNECTIONS_MAX_IDLE_MS: 600000
+      
+      
+      
+      # Enable controlled shutdown of the server.
+      #KAFKA_CONTROLLED_SHUTDOWN_ENABLE: 'true'
+      
+      # Controlled shutdown can fail for multiple reasons. This determines the number of retries when such failure
+      # happens.
+      #KAFKA_CONTROLLED_SHUTDOWN_MAX_RETRIES: 3
+      
+      # Before each retry, the system needs time to recover from the state that caused the previous failure (Controller
+      # fail over, replica lag etc). This config determines the amount of time to wait before retrying.
+      #KAFKA_CONTROLLED_SHUTDOWN_RETRY_BACKOFF_MS: 5000
+      
+      # The socket timeout for controller-to-broker channels.
+      #KAFKA_CONTROLLER_SOCKET_TIMEOUT_MS: 30000
+      
+      
+      
+      # The create topic policy class that should be used for validation. The class should implement the
+      # org.apache.kafka.server.policy.CreateTopicPolicy interface.
+      #KAFKA_CREATE_TOPIC_POLICY_CLASS_NAME: null
+      
+      
+      
+      # Default replication factors for automatically created topics.
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+
+
+      
+      # Scan interval to remove expired delegation tokens.
+      #KAFKA_DELEGATION_TOKEN_EXPIRY_CHECK_INTERVAL_MS: 3600000
+      
+      # The token validity time in miliseconds before the token needs to be renewed. Default value 1 day.
+      #KAFKA_DELEGATION_TOKEN_EXPIRY_TIME_MS: 86400000
+      
+      # Master/secret key to generate and verify delegation tokens. Same key must be configured across all the brokers.
+      # If the key is not set or set to empty string, brokers will disable the delegation token support.
+      #KAFKA_DELEGATION_TOKEN_MASTER_KEY: null
+      
+      # The token has a maximum lifetime beyond which it cannot be renewed anymore. Default value 7 days.
+      #KAFKA_DELEGATION_TOKEN_MAX_LIFETIME_MS: 604800000
+      
+      
+      
+      # Enables delete topic. Delete topic through the admin tool will have no effect if this config is turned off.
+      #KAFKA_DELETE_TOPIC_ENABLE: 'true'
+      
+      # The purge interval (in number of requests) of the delete records request purgatory.
+      #KAFKA_DELETE_RECORDS_PURGATORY_PURGE_INTERVAL_REQUESTS: 1
+      
+      
+      
+      # The purge interval (in number of requests) of the fetch request purgatory.
+      #KAFKA_FETCH_PURGATORY_PURGE_INTERVAL_REQUESTS: 1000
+      
+      
+      
+      # The amount of time the group coordinator will wait for more consumers to join a new group before performing the
+      # first rebalance. A longer delay means potentially fewer rebalances, but increases the time until processing
+      # begins.
+      #KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 3000
+
+      # The maximum allowed session timeout for registered consumers. Longer timeouts give consumers more time to
+      # process messages in between heartbeats at the cost of a longer time to detect failures.
+      #KAFKA_GROUP_MAX_SESSION_TIMEOUT_MS: 300000
+      
+      # The minimum allowed session timeout for registered consumers. Shorter timeouts result in quicker failure
+      # detection at the cost of more frequent consumer heartbeating, which can overwhelm broker resources.
+      #KAFKA_GROUP_MIN_SESSION_TIMEOUT_MS: 6000
+      
+      
+      
+      # Name of listener used for communication between brokers. If this is unset, the listener name is defined by
+      # security.inter.broker.protocol. It is an error to set this and security.inter.broker.protocol properties at the
+      # same time.
+      #KAFKA_INTER_BROKER_LISTENER_NAME: null
+      
+      # Specify which version of the inter-broker protocol will be used. This is typically bumped after all brokers
+      # were upgraded to a new version. Example of some valid values are: 0.8.0, 0.8.1, 0.8.1.1, 0.8.2, 0.8.2.0,
+      # 0.8.2.1, 0.9.0.0, 0.9.0.1 Check ApiVersion for the full list.
+      #KAFKA_INTER_BROKER_PROTOCOL_VERSION: '2.1-IV2 kafka.api.ApiVersionValidator$@4eb7f003'
+      
+      
+      
+      # The frequency with which the partition rebalance check is triggered by the controller.
+      #KAFKA_LEADER_IMBALANCE_CHECK_INTERVAL_SECONDS: 300
+
+      # The ratio of leader imbalance allowed per broker. The controller would trigger a leader balance if it goes
+      # above this value per broker. The value is specified in percentage.
+      #KAFKA_LEADER_IMBALANCE_PER_BROKER_PERCENTAGE: 10
+
+
+
+      # Maps listener names to security protocols, the default is for them to be the same.
+      # Map between listener names and security protocols. This must be defined for the same security protocol to be
+      # usable in more than one port or IP. For example, internal and external traffic can be separated even if SSL is
+      # required for both. Concretely, the user could define listeners with names INTERNAL and EXTERNAL and this
+      # property as: `INTERNAL:SSL,EXTERNAL:SSL`. As shown, key and value are separated by a colon and map entries are
+      # separated by commas. Each listener name should only appear once in the map. Different security (SSL and SASL)
+      # settings can be configured for each listener by adding a normalised prefix (the listener name is lowercased) to
+      # the config name. For example, to set a different keystore for the INTERNAL listener, a config with name
+      # listener.name.internal.ssl.keystore.location would be set. If the config for the listener name is not set, the
+      # config will fallback to the generic config (i.e. ssl.keystore.location).
+      #KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL
+
+
+
+      # The address the socket server listens on. If changed, the docker-compose port configuration will also need to
+      # be changed.
+      #KAFKA_LISTENERS: PLAINTEXT://:9092
+
+
+
+      # The amount of time to sleep when there are no logs to clean.
+      #KAFKA_LOG_CLEANER_BACKOFF_MS: 15000
+
+      # The total memory used for log deduplication across all cleaner threads.
+      #KAFKA_LOG_CLEANER_DEDUPE_BUFFER_SIZE: 134217728
+
+      # How long are delete records retained?
+      #KAFKA_LOG_CLEANER_DELETE_RETENTION_MS: 86400000
+
+      # Enable the log cleaner process to run on the server. Should be enabled if using any topics with a
+      # cleanup.policy=compact including the internal offsets topic. If disabled those topics will not be compacted and
+      # continually grow in size.
+      #KAFKA_LOG_CLEANER_ENABLE: 'true'
+
+      # Log cleaner dedupe buffer load factor. The percentage full the dedupe buffer can become. A higher value will
+      # allow more log to be cleaned at once but will lead to more hash collisions.
+      #KAFKA_LOG_CLEANER_IO_BUFFER_LOAD_FACTOR: 0.9
+
+      # The total memory used for log cleaner I/O buffers across all cleaner threads.
+      #KAFKA_LOG_CLEANER_IO_BUFFER_SIZE: 524288
+
+      # The log cleaner will be throttled so that the sum of its read and write i/o will be less than this value on average.
+      #KAFKA_LOG_CLEANER_IO_MAX_BYTES_PER_SECOND: 1.7976931348623157E308
+
+      # The minimum ratio of dirty log to total log for a log to eligible for cleaning.
+      #KAFKA_LOG_CLEANER_MIN_CLEANABLE_RATIO: 0.5
+
+      # The minimum time a message will remain uncompacted in the log. Only applicable for logs that are being compacted.
+      #KAFKA_LOG_CLEANER_MIN_COMPACTION_LAG_MS: 0
+
+      # The number of background threads to use for log cleaning.
+      #KAFKA_LOG_CLEANER_THREADS: 1
+
+      # The default cleanup policy for segments beyond the retention window. A comma separated list of valid policies.
+      # Valid policies are: "delete" and "compact" list.
+      #KAFKA_LOG_CLEANUP_POLICY: delete
+
+      # The directory in which the log data is kept (supplemental for log.dirs property)
+      #KAFKA_LOG_DIR: /tmp/kafka-logs
+
+      # The directories in which the log data is kept. If not set, the value in log.dir is used.
+      #KAFKA_LOG_DIRS: /tmp/kafka-logs
+
+      # The number of messages accumulated on a log partition before messages are flushed to disk.
+      #KAFKA_LOG_FLUSH_INTERVAL_MESSAGES: 9223372036854775807
+
+      # The maximum time in ms that a message in any topic is kept in memory before flushed to disk. If not set, the
+      # value in log.flush.scheduler.interval.ms is used
+      #KAFKA_LOG_FLUSH_INTERVAL_MS: 1000
+
+      # The frequency with which we update the persistent record of the last flush which acts as the log recovery point
+      #KAFKA_LOG_FLUSH_OFFSET_CHECKPOINT_INTERVAL_MS: 60000
+
+      # The frequency in ms that the log flusher checks whether any log needs to be flushed to disk.
+      #KAFKA_LOG_FLUSH_SCHEDULER_INTERVAL_MS: 9223372036854775807
+
+      # The frequency with which we update the persistent record of log start offset.
+      #KAFKA_LOG_FLUSH_START_OFFSET_CHECKPOINT_INTERVAL_MS: 60000
+
+      # The interval with which we add an entry to the offset index.
+      #KAFKA_LOG_INDEX_INTERVAL_BYTES: 4096
+
+      # The maximum size in bytes of the offset index.
+      #KAFKA_LOG_INDEX_SIZE_MAX_BYTES: 10485760
+
+      # This configuration controls whether down-conversion of message formats is enabled to satisfy consume requests.
+      # When set to false, broker will not perform down-conversion for consumers expecting an older message format. The
+      # broker responds with UNSUPPORTED_VERSION error for consume requests from such older clients. This
+      # configuration does not apply to any message format conversion that might be required for replication to
+      # followers.
+      #KAFKA_LOG_MESSAGE_DOWNCONVERSION_ENABLE: 'true'
+
+      # Specify the message format version the broker will use to append messages to the logs. The value should be a
+      # valid ApiVersion. Some examples are: 0.8.2, 0.9.0.0, 0.10.0, check ApiVersion for more details. By setting a
+      # particular message format version, the user is certifying that all the existing messages on disk are smaller or
+      # equal than the specified version. Setting this value incorrectly will cause consumers with older versions to
+      # break as they will receive messages with a format that they don't understand.
+      #KAFKA_LOG_MESSAGE_FORMAT_VERSION: '2.1-IV2 kafka.api.ApiVersionValidator$@4eb7f003'
+
+      # The maximum difference allowed between the timestamp when a broker receives a message and the timestamp
+      # specified in the message. If log.message.timestamp.type=CreateTime, a message will be rejected if the
+      # difference in timestamp exceeds this threshold. This configuration is ignored if
+      # log.message.timestamp.type=LogAppendTime. The maximum timestamp difference allowed should be no greater than
+      # log.retention.ms to avoid unnecessarily frequent log rolling.
+      #KAFKA_LOG_MESSAGE_TIMESTAMP_DIFFERENCE_MAX_MS: 9223372036854775807
+
+      # Define whether the timestamp in the message is message create time or log append time. The value should be
+      # either `CreateTime` or `LogAppendTime`.
+      #KAFKA_LOG_MESSAGE_TIMESTAMP_TYPE: CreateTime
+
+      # Should pre allocate file when create new segment? If you are using Kafka on Windows, you probably need to set
+      # it to true.
+      #KAFKA_LOG_PREALLOCATE: 'false'
+
+      # A size-based retention policy for logs. Segments are pruned from the log unless the remaining segments drop
+      # below log.retention.bytes.
+      #KAFKA_LOG_RETENTION_BYTES: -1
+
+      # The frequency in milliseconds that the log cleaner checks whether any log is eligible for deletion.
+      #KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 300000
+
+      # The number of hours to keep a log file before deleting it (in hours), tertiary to log.retention.ms property.
+      KAFKA_LOG_RETENTION_HOURS: 168
+
+      # The number of minutes to keep a log file before deleting it (in minutes), secondary to log.retention.ms
+      # property. If not set, the value in log.retention.hours is used.
+      #KAFKA_LOG_RETENTION_MINUTES: 10080
+
+      # The number of milliseconds to keep a log file before deleting it (in milliseconds), If not set, the value in
+      # log.retention.minutes is used.
+      #KAFKA_LOG_RETENTION_MS: 604800000
+
+      # The maximum time before a new log segment is rolled out (in hours), secondary to log.roll.ms property.
+      #KAFKA_LOG_ROLL_HOURS: 168
+
+      # The maximum jitter to subtract from logRollTimeMillis (in hours), secondary to log.roll.jitter.ms property.
+      #KAFKA_LOG_ROLL_JITTER_HOURS: 0
+
+      # The maximum jitter to subtract from logRollTimeMillis (in milliseconds). If not set, the value in
+      # log.roll.jitter.hours is used.
+      #KAFKA_LOG_ROLL_JITTER_MS: 0
+
+      # The maximum time before a new log segment is rolled out (in milliseconds). If not set, the value in
+      # log.roll.hours is used.
+      #KAFKA_LOG_ROLL_MS: 604800000
+
+      # The maximum size of a log segment file.
+      #KAFKA_LOG_SEGMENT_BYTES: 1073741824
+
+      # The amount of time to wait before deleting a file from the filesystem.
+      #KAFKA_LOG_SEGMENT_DELETE_DELAY_MS: 60000
+
+
+
+      # The maximum number of connections we allow from each ip address. This can be set to 0 if there are overrides
+      # configured using max.connections.per.ip.overrides property.
+      #KAFKA_MAX_CONNECTIONS_PER_IP: 2147483647
+
+      # A comma-separated list of per-ip or hostname overrides to the default maximum number of connections. An example
+      # value is "hostName:100,127.0.0.1:200"
+      #KAFKA_MAX_CONNECTIONS_PER_IP_OVERRIDES:
+
+      # The maximum number of incremental fetch sessions that we will maintain.
+      #KAFKA_MAX_INCREMENTAL_FETCH_SESSION_CACHE_SLOTS: 1000
+
+
+
+      # The largest record batch size allowed by Kafka. If this is increased and there are consumers older than 0.10.2,
+      # the consumers' fetch size must also be increased so that the they can fetch record batches this large. In the
+      # latest message format version, records are always grouped into batches for efficiency. In previous message
+      # format versions, uncompressed records are not grouped into batches and this limit only applies to a single
+      # record in that case. This can be set per topic with the topic level max.message.bytes config.
+      #KAFKA_MESSAGE_MAX_BYTES: 1000012
+      
+      
+      
+      # A list of classes to use as metrics reporters. Implementing the org.apache.kafka.common.metrics.MetricsReporter
+      # interface allows plugging in classes that will be notified of new metric creation. The JmxReporter is always
+      # included to register JMX statistics.
+      #KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+
+
+
+      # The metrics polling interval (in seconds) which can be used in kafka.metrics.reporters implementations.
+      #KAFKA_METRICS_POLLING_INTERVAL_SECS: 10
+
+      # A list of classes to use as Yammer metrics custom reporters. The reporters should implement
+      # kafka.metrics.KafkaMetricsReporter trait. If a client wants to expose JMX operations on a custom reporter, the
+      # custom reporter needs to additionally implement an MBean trait that extends
+      # kafka.metrics.KafkaMetricsReporterMBean trait so that the registered MBean is compliant with the standard MBean
+      # convention.
+      #KAFKA_METRICS_REPORTERS:
+
+      # The number of samples maintained to compute metrics.
+      #KAFKA_METRICS_NUM_SAMPLES: 2
+
+      # The highest recording level for metrics.
+      #KAFKA_METRICS_RECORDING_LEVEL: INFO
+
+      # The window of time a metrics sample is computed over.
+      #KAFKA_METRICS_SAMPLE_WINDOW_MS: 30000
+
+
+
+      # When a producer sets acks to "all" (or "-1"), min.insync.replicas specifies the minimum number of replicas that
+      # must acknowledge a write for the write to be considered successful. If this minimum cannot be met, then the
+      # producer will raise an exception (either NotEnoughReplicas or NotEnoughReplicasAfterAppend). When used
+      # together, min.insync.replicas and acks allow you to enforce greater durability guarantees. A typical scenario
+      # would be to create a topic with a replication factor of 3, set min.insync.replicas to 2, and produce with acks
+      # of "all". This will ensure that the producer raises an exception if a majority of replicas do not receive a
+      # write.
+      #KAFKA_MIN_INSYNC_REPLICAS: 1
+
+
+
+      # The number of threads that the server uses for processing requests, which may include disk I/O.
+      #KAFKA_NUM_IO_THREADS: 8
+
+      # The number of threads that the server uses for receiving requests from the network and sending responses to the
+      # network.
+      #KAFKA_NUM_NETWORK_THREADS: 3
+
+      # The default number of log partitions per topic.
+      KAFKA_NUM_PARTITIONS: 1
+
+      # The number of threads per data directory to be used for log recovery at startup and flushing at shutdown.
+      #KAFKA_NUM_RECOVERY_THREADS_PER_DATA_DIR: 1
+
+      # The number of threads that can move replicas between log directories, which may include disk I/O.
+      #KAFKA_NUM_REPLICA_ALTER_LOG_DIRS_THREADS: null
+
+      # Number of fetcher threads used to replicate messages from a source broker. Increasing this value can increase
+      # the degree of I/O parallelism in the follower broker.
+      #KAFKA_NUM_REPLICA_FETCHERS: 1
+
+
+
+      # The maximum size for a metadata entry associated with an offset commit.
+      #KAFKA_OFFSET_METADATA_MAX_BYTES: 4096
+
+
+
+      # The required acks before the commit can be accepted. In general, the default (-1) should not be overridden.
+      #KAFKA_OFFSETS_COMMIT_REQUIRED_ACKS: -1
+
+      # Offset commit will be delayed until all replicas for the offsets topic receive the commit or this timeout is
+      # reached. This is similar to the producer request timeout.
+      #KAFKA_OFFSETS_COMMIT_TIMEOUT_MS: 5000
+
+      # Batch size for reading from the offsets segments when loading offsets into the cache (soft-limit, overridden
+      # if records are too large).
+      #KAFKA_OFFSETS_LOAD_BUFFER_SIZE: 5242880
+
+      # Frequency at which to check for stale offsets.
+      #KAFKA_OFFSETS_RETENTION_CHECK_INTERVAL_MS: 600000
+
+      # After a consumer group loses all its consumers (i.e. becomes empty) its offsets will be kept for this retention
+      # period before getting discarded. For standalone consumers (using manual assignment), offsets will be expired
+      # after the time of last commit plus this retention period.
+      KAFKA_OFFSETS_RETENTION_MINUTES: 10080
+
+      # Compression codec for the offsets topic - compression may be used to achieve "atomic" commits.
+      #KAFKA_OFFSETS_TOPIC_COMPRESSION_CODEC: 0
+
+      # The number of partitions for the offset commit topic, "__consumer_offsets" (should not change after deployment)
+      KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: 48
+
+      # The replication factor for the offsets topic, "__consumer_offsets"  (set higher to ensure availability). Internal topic creation will fail until the cluster size meets this replication factor requirement.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+
+      # The offsets topic segment bytes should be kept relatively small in order to facilitate faster log compaction and cache loads.
+      #KAFKA_OFFSETS_TOPIC_SEGMENT_BYTES: 104857600
+
+
+
+      # The Cipher algorithm used for encoding dynamically configured passwords.
+      #KAFKA_PASSWORD_ENCODER_CIPHER_ALGORITHM: AES/CBC/PKCS5Padding
+
+      # The iteration count used for encoding dynamically configured passwords.
+      #KAFKA_PASSWORD_ENCODER_ITERATIONS: 4096
+
+      # The key length used for encoding dynamically configured passwords.
+      #KAFKA_PASSWORD_ENCODER_KEY_LENGTH: 128
+
+      # The SecretKeyFactory algorithm used for encoding dynamically configured passwords. Default is
+      # PBKDF2WithHmacSHA512 if available and PBKDF2WithHmacSHA1 otherwise.
+      #KAFKA_PASSWORD_ENCODER_KEYFACTORY_ALGORITHM: null
+
+      # The old secret that was used for encoding dynamically configured passwords. This is required only when the
+      # secret is updated. If specified, all dynamically encoded passwords are decoded using this old secret and
+      # re-encoded using password.encoder.secret when broker starts up.
+      #KAFKA_PASSWORD_ENCODER_OLD_SECRET: null
+
+      # The secret used for encoding dynamically configured passwords for this broker.
+      #KAFKA_PASSWORD_ENCODER_SECRET: null
+
+
+
+      # The fully qualified name of a class that implements the KafkaPrincipalBuilder interface, which is used to build
+      # the KafkaPrincipal object used during authorization. This config also supports the deprecated PrincipalBuilder
+      # interface which was previously used for client authentication over SSL. If no principal builder is defined, the
+      # default behavior depends on the security protocol in use. For SSL authentication, the principal name will be
+      # the distinguished name from the client certificate if one is provided; otherwise, if client authentication is
+      # not required, the principal name will be ANONYMOUS. For SASL authentication, the principal will be derived
+      # using the rules defined by sasl.kerberos.principal.to.local.rules if GSSAPI is in use, and the SASL
+      # authentication ID for other mechanisms. For PLAINTEXT, the principal will be ANONYMOUS.
+      #KAFKA_PRINCIPAL_BUILDER_CLASS: null
+      
+      
+      
+      # The purge interval (in number of requests) of the producer request purgatory.
+      #KAFKA_PRODUCER_PURGATORY_PURGE_INTERVAL_REQUESTS: 1000
+      
+      
+      
+      # The number of queued requests allowed before blocking the network threads
+      #KAFKA_QUEUED_MAX_REQUESTS: 500
+
+      # The number of queued bytes allowed before no more requests are read.
+      #KAFKA_QUEUED_MAX_REQUEST_BYTES: -1
+
+
+
+      # The number of samples to retain in memory for client quotas.
+      #KAFKA_QUOTA_WINDOWS_NUM: 11
+
+      # The time span of each sample for client quotas.
+      #KAFKA_QUOTA_WINDOWS_SIZE_SECONDS: 1
+
+
+
+      # The amount of time to sleep when fetch partition error occurs.
+      #KAFKA_REPLICA_FETCH_BACKOFF_MS: 1000
+
+      # The number of bytes of messages to attempt to fetch for each partition. This is not an absolute maximum, if the
+      # first record batch in the first non-empty partition of the fetch is larger than this value, the record batch
+      # will still be returned to ensure that progress can be made. The maximum record batch size accepted by the
+      # broker is defined via message_MAX_bytes (broker config) or max.message.bytes (topic config).
+      #KAFKA_REPLICA_FETCH_MAX_BYTES: 1048576
+
+      # Minimum bytes expected for each fetch response. If not enough bytes, wait up to replicaMaxWaitTimeMs.
+      #KAFKA_REPLICA_FETCH_MIN_BYTES: 1
+
+      # Maximum bytes expected for the entire fetch response. Records are fetched in batches, and if the first record
+      # batch in the first non-empty partition of the fetch is larger than this value, the record batch will still be
+      # returned to ensure that progress can be made. As such, this is not an absolute maximum. The maximum record
+      # batch size accepted by the broker is defined via message_MAX_bytes (broker config) or max.message.bytes (topic
+      # config).
+      #KAFKA_REPLICA_FETCH_RESPONSE_MAX_BYTES: 10485760
+
+      # Max wait time for each fetcher request issued by follower replicas. This value should always be less than the
+      # replica.lag.time_MAX_ms at all times to prevent frequent shrinking of ISR for low throughput topics.
+      #KAFKA_REPLICA_FETCH_WAIT_MAX_MS: 500
+
+      # The frequency with which the high watermark is saved out to disk.
+      #KAFKA_REPLICA_HIGH_WATERMARK_CHECKPOINT_INTERVAL_MS: 5000
+
+      # If a follower hasn't sent any fetch requests or hasn't consumed up to the leaders log end offset for at least
+      # this time, the leader will remove the follower from isr.
+      #KAFKA_REPLICA_LAG_TIME_MAX_MS: 10000
+
+      # The socket receive buffer for network requests.
+      #KAFKA_REPLICA_SOCKET_RECEIVE_BUFFER_BYTES: 65536
+
+      # The socket timeout for network requests. Its value should be at least replica.fetch.wait.max.ms.
+      #KAFKA_REPLICA_SOCKET_TIMEOUT_MS: 30000
+
+
+
+      # The number of samples to retain in memory for replication quotas.
+      #KAFKA_REPLICATION_QUOTA_WINDOW_NUM: 11
+
+      # The time span of each sample for replication quotas.
+      #KAFKA_REPLICATION_QUOTA_WINDOW_SIZE_SECONDS: 1
+
+
+
+      # The configuration controls the maximum amount of time the client will wait for the response of a request. If
+      # the response is not received before the timeout elapses the client will resend the request if necessary or fail
+      # the request if retries are exhausted.
+      #KAFKA_REQUEST_TIMEOUT_MS: 30000
+
+
+
+      # Max number that can be used for a broker.id.
+      #KAFKA_RESERVED_BROKER_MAX_ID: 1000
+
+
+
+      # The fully qualified name of a SASL client callback handler class that implements the
+      # AuthenticateCallbackHandler interface.
+      #KAFKA_SASL_CLIENT_CALLBACK_HANDLER_CLASS: null
+
+      # The list of SASL mechanisms enabled in the Kafka server. The list may contain any mechanism for which a
+      # security provider is available. Only GSSAPI is enabled by default.
+      #KAFKA_SASL_ENABLED_MECHANISMS: GSSAPI
+
+      # JAAS login context parameters for SASL connections in the format used by JAAS configuration files. JAAS
+      # configuration file format is described here. The format for the value is:
+      # 'loginModuleClass controlFlag (optionName=optionValue)*;'.
+      # For brokers, the config must be prefixed with listener prefix and SASL mechanism name in lower-case. For
+      # example, listener.name.sasl_ssl.scram-sha-256.sasl.jaas.config=com.example.ScramLoginModule required;
+      #KAFKA_SASL_JAAS_CONFIG: null
+
+      # Kerberos kinit command path.
+      #KAFKA_SASL_KERBEROS_KINIT_CMD: /usr/bin/kinit
+
+      # Login thread sleep time between refresh attempts.
+      #KAFKA_SASL_KERBEROS_MIN_TIME_BEFORE_RELOGIN: 60000
+
+      # A list of rules for mapping from principal names to short names (typically operating system usernames). The
+      # rules are evaluated in order and the first rule that matches a principal name is used to map it to a short
+      # name. Any later rules in the list are ignored. By default, principal names of the form
+      # {username}/{hostname}@{REALM} are mapped to {username}. For more details on the format please see security
+      # authorization and acls. Note that this configuration is ignored if an extension of KafkaPrincipalBuilder is
+      # provided by the principal.builder.class configuration.
+      #KAFKA_SASL_KERBEROS_PRINCIPAL_TO_LOCAL_RULES: DEFAULT
+
+      # The Kerberos principal name that Kafka runs as. This can be defined either in Kafka's JAAS config or in Kafka's
+      # config.
+      #KAFKA_SASL_KERBEROS_SERVICE_NAME: null
+
+      # Percentage of random jitter added to the renewal time.
+      #KAFKA_SASL_KERBEROS_TICKET_RENEW_JITTER: 0.05
+
+      # Login thread will sleep until the specified window factor of time from last refresh to ticket's expiry has been
+      # reached, at which time it will try to renew the ticket.
+      #KAFKA_SASL_KERBEROS_TICKET_RENEW_WINDOW_FACTOR: 0.8
+
+      # The fully qualified name of a SASL login callback handler class that implements the AuthenticateCallbackHandler
+      # interface. For brokers, login callback handler config must be prefixed with listener prefix and SASL mechanism
+      # name in lower-case. For example,
+      # listener.name.sasl_ssl.scram-sha-256.sasl.login.callback.handler.class=com.example.CustomScramLoginCallbackHandler
+      #KAFKA_SASL_LOGIN_CALLBACK_HANDLER_CLASS: null
+
+      # The fully qualified name of a class that implements the Login interface. For brokers, login config must be
+      # prefixed with listener prefix and SASL mechanism name in lower-case. For example,
+      # listener.name.sasl_ssl.scram-sha-256.sasl.login.class=com.example.CustomScramLogin
+      #KAFKA_SASL_LOGIN_CLASS: null
+
+      # The amount of buffer time before credential expiration to maintain when refreshing a credential, in seconds. If
+      # a refresh would otherwise occur closer to expiration than the number of buffer seconds then the refresh will be
+      # moved up to maintain as much of the buffer time as possible. Legal values are between 0 and 3600 (1 hour); a
+      # default value of 300 (5 minutes) is used if no value is specified. This value and
+      # sasl.login.refresh_MIN_period.seconds are both ignored if their sum exceeds the remaining lifetime of a
+      # credential. Currently applies only to OAUTHBEARER.
+      #KAFKA_SASL_LOGIN_REFRESH_BUFFER_SECONDS: 300
+
+      # The desired minimum time for the login refresh thread to wait before refreshing a credential, in seconds. Legal
+      # values are between 0 and 900 (15 minutes); a default value of 60 (1 minute) is used if no value is specified.
+      # This value and sasl.login.refresh_BUFFER_seconds are both ignored if their sum exceeds the remaining lifetime
+      # of a credential. Currently applies only to OAUTHBEARER.
+      #KAFKA_SASL_LOGIN_REFRESH_MIN_PERIOD_SECONDS: 60
+
+      # Login refresh thread will sleep until the specified window factor relative to the credential's lifetime has
+      # been reached, at which time it will try to refresh the credential. Legal values are between 0.5 (50%) and 1.0
+      # (100%) inclusive; a default value of 0.8 (80%) is used if no value is specified. Currently applies only to
+      # OAUTHBEARER.
+      #KAFKA_SASL_LOGIN_REFRESH_WINDOW_FACTOR: 0.8
+
+      # The maximum amount of random jitter relative to the credential's lifetime that is added to the login refresh
+      # thread's sleep time. Legal values are between 0 and 0.25 (25%) inclusive; a default value of 0.05 (5%) is used
+      # if no value is specified. Currently applies only to OAUTHBEARER.
+      #KAFKA_SASL_LOGIN_REFRESH_WINDOW_JITTER: 0.05
+
+      # SASL mechanism used for inter-broker communication. Default is GSSAPI.
+      #KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: GSSAPI
+
+      # The fully qualified name of a SASL server callback handler class that implements the
+      # AuthenticateCallbackHandler interface. Server callback handlers must be prefixed with listener prefix and SASL
+      # mechanism name in lower-case. For example,
+      # listener.name.sasl_ssl.plain.sasl.server.callback.handler.class=com.example.CustomPlainCallbackHandler.
+      #KAFKA_SASL_SERVER_CALLBACK_HANDLER_CLASS: null
+
+
+
+      # Security protocol used to communicate between brokers. Valid values are: PLAINTEXT, SSL, SASL_PLAINTEXT,
+      # SASL_SSL. It is an error to set this and inter.broker.listener.name properties at the same time.
+      #KAFKA_SECURITY_INTER_BROKER_PROTOCOL: PLAINTEXT
+
+
+
+      # The receive buffer (SO_RCVBUF) used by the socket server. If the value is -1, the OS default will be used.
+      #KAFKA_SOCKET_RECEIVE_BUFFER_BYTES: 102400
+
+      # The maximum size of a request that the socket server will accept (protection against OOM)
+      #KAFKA_SOCKET_REQUEST_MAX_BYTES: 104857600
+
+      # The send buffer (SO_SNDBUF) used by the socket server. If the value is -1, the OS default will be used.
+      #KAFKA_SOCKET_SEND_BUFFER_BYTES: 102400
+
+
+
+      # A list of cipher suites. This is a named combination of authentication, encryption, MAC and key exchange
+      # algorithm used to negotiate the security settings for a network connection using TLS or SSL network protocol.
+      # By default all the available cipher suites are supported.
+      #KAFKA_SSL_CIPHER_SUITES:
+
+      # Configures kafka broker to request client authentication. The following settings are common:
+      #   - required: If set to required client authentication is required.
+      #   - requested: This means client authentication is optional. unlike requested, if this option is set client can
+      #                choose not to provide authentication information about itself.
+      #   - none: This means client authentication is not needed.
+      #KAFKA_SSL_CLIENT_AUTH: none
+
+      # The list of protocols enabled for SSL connections.
+      #KAFKA_SSL_ENABLED_PROTOCOLS: TLSv1.2,TLSv1.1,TLSv1
+
+      # The endpoint identification algorithm to validate server hostname using server certificate.
+      #KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
+
+      # The password of the private key in the key store file. This is optional for client.
+      #KAFKA_SSL_KEY_PASSWORD: null
+
+      # The algorithm used by key manager factory for SSL connections. Default value is the key manager factory
+      # algorithm configured for the Java Virtual Machine.
+      #KAFKA_SSL_KEYMANAGER_ALGORITHM: SunX509
+
+      # The location of the key store file. This is optional for client and can be used for two-way authentication for
+      # client.
+      #KAFKA_SSL_KEYSTORE_LOCATION: null
+
+      # The store password for the key store file. This is optional for client and only needed if ssl.keystore.location
+      # is configured.
+      #KAFKA_SSL_KEYSTORE_PASSWORD: null
+
+      # The file format of the key store file. This is optional for client.
+      #KAFKA_SSL_KEYSTORE_TYPE: JKS
+
+      # The SSL protocol used to generate the SSLContext. Default setting is TLS, which is fine for most cases. Allowed
+      # values in recent JVMs are TLS, TLSv1.1 and TLSv1.2. SSL, SSLv2 and SSLv3 may be supported in older JVMs, but
+      # their usage is discouraged due to known security vulnerabilities.
+      #KAFKA_SSL_PROTOCOL: TLS
+
+      # The name of the security provider used for SSL connections. Default value is the default security provider of
+      # the JVM.
+      #KAFKA_SSL_PROVIDER: null
+
+      # The SecureRandom PRNG implementation to use for SSL cryptography operations.
+      #KAFKA_SSL_SECURE_RANDOM_IMPLEMENTATION: null
+
+      # The algorithm used by trust manager factory for SSL connections. Default value is the trust manager factory
+      # algorithm configured for the Java Virtual Machine.
+      #KAFKA_SSL_TRUSTMANAGER_ALGORITHM: PKIX
+
+      # The location of the trust store file.
+      #KAFKA_SSL_TRUSTSTORE_LOCATION: null
+
+      # The password for the trust store file. If a password is not set access to the truststore is still available,
+      # but integrity checking is disabled.
+      #KAFKA_SSL_TRUSTSTORE_PASSWORD: null
+
+      # The file format of the trust store file.
+      #KAFKA_SSL_TRUSTSTORE_TYPE: JKS
+
+
+
+      # The interval at which to rollback transactions that have timed out.
+      #KAFKA_TRANSACTION_ABORT_TIMED_OUT_TRANSACTION_CLEANUP_INTERVAL_MS: 60000
+
+      # The maximum allowed timeout for transactions. If a client’s requested transaction time exceed this, then the
+      # broker will return an error in InitProducerIdRequest. This prevents a client from too large of a timeout,
+      # which can stall consumers reading from topics included in the transaction.
+      #KAFKA_TRANSACTION_MAX_TIMEOUT_MS: 900000
+
+      # The interval at which to remove transactions that have expired due to transactional.id.expiration.ms passing.
+      #KAFKA_TRANSACTION_REMOVE_EXPIRED_TRANSACTION_CLEANUP_INTERVAL_MS: 3600000
+
+      # Batch size for reading from the transaction log segments when loading producer ids and transactions into the
+      # cache (soft-limit, overridden if records are too large).
+      #KAFKA_TRANSACTION_STATE_LOG_LOAD_BUFFER_SIZE: 5242880
+
+      # Overridden min.insync.replicas config for the transaction topic.
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+
+      # The number of partitions for the transaction topic, "__transaction_state" (should not change after deployment).
+      KAFKA_TRANSACTION_STATE_LOG_NUM_PARTITIONS: 48
+
+      # The replication factor for the transaction topic, "__transaction_state"  (set higher to ensure availability).
+      # Internal topic creation will fail until the cluster size meets this replication factor requirement.
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+
+      # The transaction topic segment bytes should be kept relatively small in order to facilitate faster log
+      # compaction and cache loads.
+      #KAFKA_TRANSACTION_STATE_LOG_SEGMENT_BYTES: 104857600
+
+      # The maximum amount of time in ms that the transaction coordinator will wait before proactively expire a
+      # producer's transactional id without receiving any transaction status updates from it.
+      #KAFKA_TRANSACTIONAL_ID_EXPIRATION_MS: 604800000
+
+
+
+      # Indicates whether to enable replicas not in the ISR set to be elected as leader as a last resort, even though
+      # doing so may result in data loss.
+      #KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE: 'false'
+
+
+
+      # Specifies the ZooKeeper connection string in the form hostname:port where host and port are the host and port
+      # of a ZooKeeper server. To allow connecting through other ZooKeeper nodes when that ZooKeeper machine is down
+      # you can also specify multiple hosts in the form hostname1:port1,hostname2:port2,hostname3:port3. The server can
+      # also have a ZooKeeper chroot path as part of its ZooKeeper connection string which puts its data under some
+      # path in the global ZooKeeper namespace. For example to give a chroot path of /chroot/path you would give the
+      # connection string as hostname1:port1,hostname2:port2,hostname3:port3/chroot/path.
+      KAFKA_ZOOKEEPER_CONNECT: 192.2.0.1:2181,192.2.0.2:2181,192.2.0.3:2181
+
+      # The max time that the client waits to establish a connection to zookeeper. If not set, the value in
+      # zookeeper.session.timeout.ms is used.
+      #KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS: 6000
+
+      # The maximum number of unacknowledged requests the client will send to Zookeeper before blocking.
+      #KAFKA_ZOOKEEPER_MAX_IN_FLIGHT_REQUESTS: 10
+
+      # Zookeeper session timeout.
+      #KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS: 6000
+
+      # Set client to use secure ACLs boolean.
+      #KAFKA_ZOOKEEPER_SET_ACL: 'false'
+
+      # How far a ZK follower can be behind a ZK leader.
+      #KAFKA_ZOOKEEPER_SYNC_TIME_MS: 2000

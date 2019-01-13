@@ -1,0 +1,179 @@
+#------------------------------------------------------------------------------
+# Copyright 2019 Robert Cowart
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#------------------------------------------------------------------------------
+
+version: '3'
+services:
+  chronograf:
+    image: chronograf:1.7.5
+    container_name: chronograf
+    restart: unless-stopped
+    hostname: chronograf
+    network_mode: bridge
+    ports:
+      - 8888:8888/tcp
+    volumes:
+      - /var/lib/chronograf:/var/lib/chronograf
+    environment:
+      ### Chronograf Service Options
+      # The IP that the chronograf service listens on.
+      HOST: 0.0.0.0
+      
+      # The port that the chronograf service listens on for insecure connections.
+      PORT: 8888
+      
+      # The file path to the BoltDB file.
+      BOLT_PATH: /var/lib/chronograf/chronograf-v1.db
+      
+      # The path to the directory of canned dashboards files.
+      CANNED_PATH: /usr/share/chronograf/canned
+      
+      # Path to directory of canned dashboards, sources, Kapacitor connections, and organizations.
+      RESOURCES_PATH: /usr/share/chronograf/resources
+      
+      # ProtoBoards Path.
+      PROTOBOARDS_PATH: /usr/share/chronograf/protoboards
+      
+      # The URL path prefix under which all chronograf routes will be mounted.
+      #BASE_PATH: 
+      
+      # URL of JSON feed to display as a news feed on the client Status page.
+      #STATUS_FEED_URL: https://www.influxdata.com/feed/json
+
+      
+      
+      ### InfluxDB Connection Options
+      # The location of your InfluxDB instance, including http://, IP address, and port.
+      INFLUXDB_URL: http://127.0.0.1:8086
+      
+      # The [username] for your InfluxDB instance.
+      #INFLUXDB_USERNAME: 
+      
+      # The [password] for your InfluxDB instance.
+      #INFLUXDB_PASSWORD: 
+      
+      # The location of your Kapacitor instance, including http://, IP address, and port.
+      #KAPACITOR_URL: http://127.0.0.1:9092
+      
+      # The username for your Kapacitor instance.
+      #KAPACITOR_USERNAME: 
+      
+      # The password for your Kapacitor instance.
+      #KAPACITOR_PASSWORD: 
+
+      
+      
+      ### TLS (Transport Layer Security) Options
+      # The file path to PEM-encoded public key certificate.
+      #TLS_CERTIFICATE: 
+      
+      # The file path to private key associated with given certificate.
+      #TLS_PRIVATE_KEY: 
+      
+      # Custom link added to Chronograf User menu options. Useful for providing links to internal company resources for your Chronograf users. Can be used when any OAuth 2.0 authentication is enabled. To add another custom link, repeat the custom link option.
+      #CUSTOM_LINK: http://www.influxdata.com/
+      
+      # Disables reporting of usage statistics. Usage statistics reported once every 24 hours include: OS, arch, version, cluster_id, and uptime.
+      REPORTING_DISABLED: 'true'
+      
+      # Set the logging level. Valid values: debug | info | error
+      LOG_LEVEL: info
+
+      
+      
+      ### Authentication Options
+      # The secret for signing tokens.
+      #TOKEN_SECRET: 
+      
+      # The total duration (in hours) of cookie life for authentication. Authentication expires on browser close when AUTH_DURATION is 0.
+      #AUTH_DURATION: 720h
+      
+      # The public URL required to access Chronograf using a web browser. For example, if you access Chronograf using the default URL, the public URL value would be http://localhost:8888. Required for Google OAuth 2.0 authentication. Used for Auth0 and some generic OAuth 2.0 authentication providers.
+      PUBLIC_URL: http://127.0.0.1
+      
+      
+      
+      ### GitHub-specific OAuth 2.0 Authentication Options
+      # The GitHub client ID value for OAuth 2.0 support.
+      #GH_CLIENT_ID: 
+      
+      # The GitHub Client Secret value for OAuth 2.0 support.
+      #GH_CLIENT_SECRET: 
+      
+      # [Optional] Specify a GitHub organization membership required for a user.
+      #GH_ORGS: 
+
+      
+      
+      ### Google-specific OAuth 2.0 Authentication Options
+      # The Google Client ID value required for OAuth 2.0 support.
+      #GOOGLE_CLIENT_ID: 
+      
+      # The Google Client Secret value required for OAuth 2.0 support.
+      #GOOGLE_CLIENT_SECRET: 
+      
+      # [Optional] Restricts authorization to users from specified Google email domains.
+      #GOOGLE_DOMAINS: 
+      
+      # Auth0-specific OAuth 2.0 Authentication Options
+      #AUTH0_DOMAIN: https://myauth0client.auth0.com
+      
+      # The Auth0 Client ID value required for OAuth 2.0 support.
+      #AUTH0_CLIENT_ID: 
+      
+      # The Auth0 Client Secret value required for OAuth 2.0 support.
+      #AUTH0_CLIENT_SECRET: 
+      
+      # [Optional] The Auth0 organization membership required to access Chronograf. Organizations are set using an “organization” key in the user’s app_metadata. Lists are comma-separated and are only available when using environment variables.
+      #AUTH0_ORGS: 
+
+      
+      
+      ### Heroku-specific OAuth 2.0 Authentication Options
+      # The Heroku Client ID for OAuth 2.0 support.
+      #HEROKU_CLIENT_ID: 
+      
+      # The Heroku Secret for OAuth 2.0 support.
+      #HEROKU_SECRET: 
+      
+      # The Heroku organization memberships required for access to Chronograf. Lists are comma-separated.
+      #HEROKU_ORGS: 
+
+      
+      
+      ### Generic OAuth 2.0 authentication options
+      # The generic OAuth 2.0 name presented on the login page.
+      #GENERIC_NAME: 
+      
+      # The generic OAuth 2.0 Client ID value. Can be used for a custom OAuth 2.0 service.
+      #GENERIC_CLIENT_ID: 
+      
+      # The generic OAuth 2.0 Client Secret value.
+      #GENERIC_CLIENT_SECRET: 
+      
+      # The scopes requested by provider of web client.
+      #GENERIC_SCOPES: user:email
+      
+      # The email domain required for user email addresses.
+      #GENERIC_DOMAINS: example.com
+      
+      # The authorization endpoint URL for the OAuth 2.0 provider.
+      #GENERIC_AUTH_URL: 
+      
+      # The token endpoint URL for the OAuth 2.0 provider.
+      #GENERIC_TOKEN_URL: 
+      
+      # The URL that returns OpenID UserInfo-compatible information.
+      #GENERIC_API_URL: 

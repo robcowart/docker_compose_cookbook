@@ -1,0 +1,46 @@
+#------------------------------------------------------------------------------
+# Copyright 2019 Robert Cowart
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#------------------------------------------------------------------------------
+
+version: '3'
+services:
+  grafana:
+    image: grafana/grafana:5.4.2
+    container_name: grafana
+    restart: unless-stopped
+    hostname: grafana
+    network_mode: bridge
+    ports:
+      - 3000:3000/tcp
+    volumes:
+      - /var/lib/grafana:/var/lib/grafana
+      - /var/log/grafana:/var/log/grafana
+      - /etc/grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      GF_SERVER_ROOT_URL: http://127.0.0.1
+      #GF_SECURITY_ADMIN_PASSWORD: changeme
+      #GF_INSTALL_PLUGINS: 'grafana-clock-panel,grafana-simple-json-datasource,grafana-worldmap-panel,grafana-clock-panel,grafana-piechart-panel,grafana-influxdb-flux-datasource,grafana-kubernetes-app,grafana-polystat-panel'
+
+      #GF_PATHS_CONFIG: /etc/grafana/grafana.ini
+      #GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+      #GF_PATHS_HOME: /usr/share/grafana
+      #GF_PATHS_LOGS: /var/log/grafana
+      #GF_PATHS_DATA: /var/lib/grafana
+      #GF_PATHS_PLUGINS: /var/lib/grafana/plugins
+
+      #GF_AWS_PROFILES: default
+      #GF_AWS_default_ACCESS_KEY_ID: YOUR_ACCESS_KEY
+      #GF_AWS_default_SECRET_ACCESS_KEY: YOUR_SECRET_KEY
+      #GF_AWS_default_REGION: us-east-1
