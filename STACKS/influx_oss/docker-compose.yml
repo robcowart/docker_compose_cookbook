@@ -19,7 +19,7 @@ networks:
   tick:
 services:
   influxdb:
-    image: influxdb:1.7.2
+    image: influxdb:1.7.3
     container_name: influxdb
     restart: 'no'
     ulimits:
