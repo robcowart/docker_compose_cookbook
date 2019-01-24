@@ -361,7 +361,7 @@ services:
       #INFLUXDB_TLS_MAX_VERSION: tls1.2
 
   chronograf:
-    image: chronograf:1.7.5
+    image: chronograf:1.7.7
     container_name: chronograf
     depends_on:
       - influxdb
@@ -591,7 +591,7 @@ services:
       KAPACITOR_STATS_RETENTION_POLICY: autogen
 
   grafana:
-    image: grafana/grafana:5.4.2
+    image: grafana/grafana:5.4.3
     container_name: grafana
     depends_on:
       - influxdb
