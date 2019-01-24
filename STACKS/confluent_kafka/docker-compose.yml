@@ -1,0 +1,193 @@
+#------------------------------------------------------------------------------
+# Copyright 2019 Robert Cowart
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#------------------------------------------------------------------------------
+
+version: '3'
+networks:
+  kafka:
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.1.0-1
+    container_name: zookeeper
+    restart: 'no'
+    hostname: zookeeper
+    networks:
+      - kafka
+    ports:
+      # Client
+      - 2181:2181
+      # Peer
+      - 2888:2888
+      # Leader
+      - 3888:3888
+      # JMX
+      - 10020:10020
+    volumes:
+      - /var/lib/zookeeper/data:/var/lib/zookeeper/data
+      - /var/lib/zookeeper/log:/var/lib/zookeeper/log
+      - /var/log/zookeeper:/var/log/zookeeper
+    environment:
+      # JVM heap size.
+      KAFKA_HEAP_OPTS: '-Xms512m -Xmx512m'
+      
+      # JMX Settings.
+      KAFKA_JMX_HOSTNAME: 0.0.0.0
+      KAFKA_JMX_PORT: 10020
+      #KAFKA_JMX_OPTS: '-Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote=true  -Dcom.sun.management.jmxremote.port=10020 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false'
+      
+      # The directory where ZooKeeper logs will be stored.
+      LOG_DIR: /var/log/zookeeper
+      
+      # The directory where ZooKeeper data will be stored.
+      ZOOKEEPER_DATA_DIR: /var/lib/zookeeper
+      
+      # the port at which the clients will connect
+      ZOOKEEPER_CLIENT_PORT: 2181
+      
+      # The number of milliseconds of each tick
+      ZOOKEEPER_TICK_TIME: 2000
+      
+      # The number of ticks that the initial synchronization phase can take
+      ZOOKEEPER_INIT_LIMIT: 5
+      
+      # The number of ticks that can pass between sending a request and getting an acknowledgement
+      ZOOKEEPER_SYNC_LIMIT: 2
+      
+      # Limits the number of concurrent connections (at the socket level) that a single client, identified by IP address, may make to a single member of the ZooKeeper ensemble. Defaults to 60. Disabled is 0.
+      ZOOKEEPER_MAX_CLIENT_CNXNS: 0
+      
+      # The id must be unique within the ensemble and should have a value between 1 and 255.
+      ZOOKEEPER_SERVER_ID: 1
+      
+      # A list of machines of the Zookeeper ensemble.
+      ZOOKEEPER_SERVERS: zookeeper:2888:3888
+
+  kafka:
+    image: confluentinc/cp-kafka:5.1.0-1
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    restart: 'no'
+    hostname: kafka
+    networks:
+      - kafka
+    ports:
+      # kafka broker listener
+      - 9092:9092
+      # JMX
+      - 10030:10030
+    volumes:
+      - /var/lib/kafka/data:/var/lib/kafka/data
+      - /var/log/kafka:/var/log/kafka
+    environment:
+      # JVM heap size.
+      KAFKA_HEAP_OPTS: '-Xms1g -Xmx1g'
+
+      # JMX Settings.
+      KAFKA_JMX_HOSTNAME: 0.0.0.0
+      KAFKA_JMX_PORT: 10030
+      #KAFKA_JMX_OPTS: '-Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=10030 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false'
+
+      # A comma seperated list of directories under which to store log files
+      LOG_DIR: /var/log/kafka
+
+      # The directory where ZooKeeper data will be stored.
+      KAFKA_DATA_DIR: /var/lib/kafka
+
+      # Listeners to publish to ZooKeeper for clients to use, if different than the listeners config property. In IaaS
+      # environments, this may need to be different from the interface to which the broker binds. If this is not set,
+      # the value for listeners will be used. Unlike listeners it is not valid to advertise the 0.0.0.0 meta-address.
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+
+      # The broker id for this server. If unset, a unique broker id will be generated. To avoid conflicts between
+      # zookeeper generated broker id's and user configured broker id's, generated broker ids start from
+      # reserved.broker_MAX_id + 1.
+      KAFKA_BROKER_ID: 0
+
+      # If set to true, and confluent-support-metrics package is installed then the feature to collect and report
+      # support metrics ("Metrics") is enabled.
+      KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: 'false'
+
+      # Default replication factors for automatically created topics.
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+
+      # Enables delete topic. Delete topic through the admin tool will have no effect if this config is turned off.
+      KAFKA_DELETE_TOPIC_ENABLE: 'true'
+      
+      # The address the socket server listens on. If changed, the docker-compose port configuration will also need to
+      # be changed.
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+
+      # The number of hours to keep a log file before deleting it (in hours), tertiary to log.retention.ms property.
+      KAFKA_LOG_RETENTION_HOURS: 168
+
+      # When a producer sets acks to "all" (or "-1"), min.insync.replicas specifies the minimum number of replicas that
+      # must acknowledge a write for the write to be considered successful. If this minimum cannot be met, then the
+      # producer will raise an exception (either NotEnoughReplicas or NotEnoughReplicasAfterAppend). When used
+      # together, min.insync.replicas and acks allow you to enforce greater durability guarantees. A typical scenario
+      # would be to create a topic with a replication factor of 3, set min.insync.replicas to 2, and produce with acks
+      # of "all". This will ensure that the producer raises an exception if a majority of replicas do not receive a
+      # write.
+      KAFKA_MIN_INSYNC_REPLICAS: 1
+
+      # The default number of log partitions per topic.
+      KAFKA_NUM_PARTITIONS: 3
+
+      # After a consumer group loses all its consumers (i.e. becomes empty) its offsets will be kept for this retention
+      # period before getting discarded. For standalone consumers (using manual assignment), offsets will be expired
+      # after the time of last commit plus this retention period.
+      KAFKA_OFFSETS_RETENTION_MINUTES: 10080
+
+      # The number of partitions for the offset commit topic, "__consumer_offsets" (should not change after deployment)
+      KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: 12
+
+      # The replication factor for the offsets topic, "__consumer_offsets"  (set higher to ensure availability). Internal topic creation will fail until the cluster size meets this replication factor requirement.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+      # Overridden min.insync.replicas config for the transaction topic.
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+      # The number of partitions for the transaction topic, "__transaction_state" (should not change after deployment).
+      KAFKA_TRANSACTION_STATE_LOG_NUM_PARTITIONS: 12
+
+      # The replication factor for the transaction topic, "__transaction_state"  (set higher to ensure availability).
+      # Internal topic creation will fail until the cluster size meets this replication factor requirement.
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+      # The maximum amount of time in ms that the transaction coordinator will wait before proactively expire a
+      # producer's transactional id without receiving any transaction status updates from it.
+      KAFKA_TRANSACTIONAL_ID_EXPIRATION_MS: 604800000
+
+      # Specifies the ZooKeeper connection string in the form hostname:port where host and port are the host and port
+      # of a ZooKeeper server. To allow connecting through other ZooKeeper nodes when that ZooKeeper machine is down
+      # you can also specify multiple hosts in the form hostname1:port1,hostname2:port2,hostname3:port3. The server can
+      # also have a ZooKeeper chroot path as part of its ZooKeeper connection string which puts its data under some
+      # path in the global ZooKeeper namespace. For example to give a chroot path of /chroot/path you would give the
+      # connection string as hostname1:port1,hostname2:port2,hostname3:port3/chroot/path.
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
+  kafka_manager:
+    image: hlebalbau/kafka-manager:1.3.3.22
+    container_name: kafka-manager
+    restart: 'no'
+    hostname: kafka-manager
+    networks:
+      - kafka
+    ports:
+      - 9000:9000
+    environment:
+      ZK_HOSTS: zookeeper:2181
+      APPLICATION_SECRET: secret
+    command: -Dpidfile.path=/dev/null
