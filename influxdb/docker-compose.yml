@@ -17,7 +17,7 @@
 version: '3'
 services:
   influxdb:
-    image: influxdb:1.7.3
+    image: influxdb:1.7.4
     container_name: influxdb
     restart: unless-stopped
     ulimits:
@@ -40,6 +40,35 @@ services:
       # Bind address to use for the RPC service for backup and restore.
       INFLUXDB_BIND_ADDRESS: 0.0.0.0:8088
  
+
+
+      # The following _USER and _PASSWORD environment variables will only work, if the environment variable
+      # INFLUXDB_HTTP_AUTH_ENABLED or the config variable auth-enabled is true:
+
+      # Admin username (mandatory if auth-enabled is true and any other of these environment variables is set)
+      #INFLUXDB_ADMIN_USER: admin
+
+      # Admin password (Password will be generated and printed if not set)
+      #INFLUXDB_ADMIN_PASSWORD: changeme
+
+      # Name for a user with read and write permissions on the INFLUXDB_DB database
+      #INFLUXDB_USER: rwuser
+      
+      # Password for INFLUXDB_USER (Password will be generated and printed if not set)
+      #INFLUXDB_USER_PASSWORD: changeme
+
+      # Name for a user with read permissions on the INFLUXDB_DB database
+      #INFLUXDB_READ_USER: rouser
+      
+      # Password for INFLUXDB_READ_USER (Password will be generated and printed if not set)
+      #INFLUXDB_READ_USER_PASSWORD: changeme
+
+      # Name for a user with write permissions on the INFLUXDB_DB database
+      #INFLUXDB_WRITE_USER: wouser
+      
+      # Password for INFLUXDB_WRITE_USER (Password will be generated and printed if not set)
+      #INFLUXDB_WRITE_USER_PASSWORD: changeme
+
 
 
       ### Controls the parameters for the Raft consensus group that stores metadata about the InfluxDB cluster.

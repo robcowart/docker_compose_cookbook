@@ -17,7 +17,7 @@
 version: '3'
 services:
   chronograf:
-    image: chronograf:1.7.7
+    image: chronograf:1.7.8
     container_name: chronograf
     restart: unless-stopped
     hostname: chronograf
@@ -55,6 +55,7 @@ services:
       
       
       ### InfluxDB Connection Options
+      
       # The location of your InfluxDB instance, including http://, IP address, and port.
       INFLUXDB_URL: http://127.0.0.1:8086
       
@@ -63,7 +64,11 @@ services:
       
       # The [password] for your InfluxDB instance.
       #INFLUXDB_PASSWORD: 
-      
+
+
+
+      ### Kapacitor Connection Options
+
       # The location of your Kapacitor instance, including http://, IP address, and port.
       #KAPACITOR_URL: http://127.0.0.1:9092
       
