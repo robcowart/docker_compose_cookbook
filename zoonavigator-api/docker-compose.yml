@@ -1,0 +1,127 @@
+#------------------------------------------------------------------------------
+# Copyright 2019 Robert Cowart
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#------------------------------------------------------------------------------
+
+version: '3'
+services:
+  zoonavigator-api:
+    image: elkozmon/zoonavigator-api:0.6.0
+    container_name: zoonavigator-api
+    restart: unless-stopped
+    hostname: zoonavigator-api
+    network_mode: bridge
+    ports:
+      - 9000:9000/tcp
+    environment:
+      ### API Server Settings
+
+      # Tells the HTTP server which port to bind to. To disable HTTP set this variable to disabled.
+      API_HTTP_PORT: 9000
+
+      # If set, HTTPS server will bind to this port.
+      #API_HTTPS_PORT: 9443
+
+      # The path to the keystore containing the private key and certificate, if not provided generates a keystore for
+      # you.
+      # API_SSL_KEYSTORE_PATH: 
+
+      # The password to the keystore, defaults to a blank password.
+      #API_SSL_KEYSTORE_PASSWORD: 
+
+      # The key store type.
+      #API_SSL_KEYSTORE_TYPE: 
+
+      # Sets session inactivity timeout for users. This value is in milliseconds.
+      # default: 900000
+      #API_SESSION_TIMEOUT_MILLIS: 900000
+
+      # Secret key for Play Framework - used for signing session cookies and CSRF tokens.
+      # Defaults to 64 random characters generated from /dev/urandom.
+      #API_SECRET: 
+
+
+
+      ### Java Settings
+
+      # Custom Java arguments.
+      #JAVA_OPTS: 
+
+      # Sets initial Java heap size. This value is in bytes if no unit is specified.
+      #JAVA_XMS: 
+
+      # Sets maximum Java heap size. This value is in bytes if no unit is specified.
+      #JAVA_XMX: 
+
+      # Path to JAAS login configuration file to use.
+      #JAVA_JAAS_LOGIN_CONFIG
+
+      # If set to true, enables debugging mode and detailed logging for Kerberos.
+      #JAVA_KRB5_DEBUG
+
+      # Sets the default Kerberos realm.
+      #JAVA_KRB5_REALM
+
+      # Sets the default Kerberos KDC.
+      #JAVA_KRB5_KDC
+
+
+
+      ### Zookeeper Client Settings
+
+      # Sets inactivity timeout for ZooKeeper client. If user doesn’t make any request during this period ZooKeeper
+      # connection will be closed and recreated for the future request if any. Note that user does not get logged out
+      # unlike in event of session timeout. This value is in milliseconds.
+      # default: 5000
+      #ZK_CLIENT_TIMEOUT_MILLIS: 5000
+
+      # Sets timeout for attempt to establish connection with ZooKeeper. This value is in milliseconds.
+      # default: 5000
+      #ZK_CONNECT_TIMEOUT_MILLIS: 5000
+
+      # Set the value to false to disable SASL authentication.
+      # default: true
+      ZK_SASL_CLIENT: "false"
+
+      # Specifies the context key in the JAAS login file.
+      # default: Client
+      #ZK_SASL_CLIENT_CONFIG: Client
+
+      # Specifies the primary part of the server principal. Learn more here.
+      # default: zookeeper
+      #ZK_SASL_CLIENT_USERNAME: zookeeper
+
+      # Realm part of the server principal. By default it is the client principal realm.
+      #ZK_SERVER_REALM: 
+
+      # If you want to connect to the server secure client port, you need to set this property to true. This will
+      # connect to server using SSL with specified credentials. Note that it requires using the Netty client.
+      #ZK_CLIENT_SECURE: 
+
+      # Specifies which ClientCnxnSocket to be used. If you want to connect to server’s secure client port, you need to
+      # set this property to: org.apache.zookeeper.ClientCnxnSocketNetty.
+      # default: org.apache.zookeeper.ClientCnxnSocketNIO
+      #ZK_CLIENT_CNXN_SOCKET: org.apache.zookeeper.ClientCnxnSocketNIO
+
+      # Specifies the file path to a JKS containing the local credentials to be used for SSL connections.
+      #ZK_SSL_KEYSTORE_PATH: 
+
+      # Specifies the password to a JKS containing the local credentials to be used for SSL connections.
+      #ZK_SSL_KEYSTORE_PASSWORD: 
+
+      # Specifies the file path to a JKS containing the remote credentials to be used for SSL connections.
+      #ZK_SSL_TRUSTSTORE_PATH: 
+
+      # Specifies the password to a JKS containing the remote credentials to be used for SSL connections.
+      #ZK_SSL_TRUSTSTORE_PASSWORD: 

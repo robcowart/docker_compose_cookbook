@@ -17,16 +17,16 @@
 version: '3'
 services:
   kafka:
-    image: confluentinc/cp-kafka:5.1.1-1
+    image: confluentinc/cp-kafka:5.1.2-1
     container_name: kafka
     restart: unless-stopped
     hostname: kafka
     network_mode: bridge
     ports:
       # kafka broker listener
-      - 9092:9092
+      - 9092:9092/tcp
       # JMX
-      - 10030:10030
+      - 10030:10030/tcp
     volumes:
       - /var/lib/kafka/data:/var/lib/kafka/data
       - /var/log/kafka:/var/log/kafka
@@ -837,7 +837,7 @@ services:
       # also have a ZooKeeper chroot path as part of its ZooKeeper connection string which puts its data under some
       # path in the global ZooKeeper namespace. For example to give a chroot path of /chroot/path you would give the
       # connection string as hostname1:port1,hostname2:port2,hostname3:port3/chroot/path.
-      KAFKA_ZOOKEEPER_CONNECT: 192.2.0.1:2181,192.2.0.2:2181,192.2.0.3:2181
+      KAFKA_ZOOKEEPER_CONNECT: 192.0.2.1:2181,192.0.2.2:2181,192.0.2.3:2181
 
       # The max time that the client waits to establish a connection to zookeeper. If not set, the value in
       # zookeeper.session.timeout.ms is used.

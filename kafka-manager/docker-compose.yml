@@ -23,8 +23,8 @@ services:
     hostname: kafka-manager
     network_mode: bridge
     ports:
-      - 9000:9000
+      - 9000:9000/tcp
     environment:
-      ZK_HOSTS: 192.2.0.1:2181,192.2.0.2:2181,192.2.0.3:2181
+      ZK_HOSTS: 192.0.2.1:2181,192.0.2.2:2181,192.0.2.3:2181
       APPLICATION_SECRET: secret
     command: -Dpidfile.path=/dev/null

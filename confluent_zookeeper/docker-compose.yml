@@ -17,20 +17,20 @@
 version: '3'
 services:
   zookeeper:
-    image: confluentinc/cp-zookeeper:5.1.1-1
+    image: confluentinc/cp-zookeeper:5.1.2-1
     container_name: zookeeper
     restart: unless-stopped
     hostname: zookeeper
     network_mode: bridge
     ports:
       # Client
-      - 2181:2181
+      - 2181:2181/tcp
       # Peer
-      - 2888:2888
+      - 2888:2888/tcp
       # Leader
-      - 3888:3888
+      - 3888:3888/tcp
       # JMX
-      - 10020:10020
+      - 10020:10020/tcp
     volumes:
       - /var/lib/zookeeper/data:/var/lib/zookeeper/data
       - /var/lib/zookeeper/log:/var/lib/zookeeper/log
@@ -69,4 +69,4 @@ services:
       ZOOKEEPER_SERVER_ID: 1
       
       # A list of machines of the Zookeeper ensemble.
-      ZOOKEEPER_SERVERS: 192.2.0.1:2888:3888;192.2.0.2:2888:3888;192.2.0.3:2888:3888
+      ZOOKEEPER_SERVERS: 192.0.2.1:2888:3888;192.0.2.2:2888:3888;192.0.2.3:2888:3888
