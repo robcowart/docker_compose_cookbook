@@ -23,6 +23,6 @@ services:
     hostname: redis-commander
     network_mode: bridge
     ports:
-      - 8081:8081
+      - 8081:8081/tcp
     environment:
-      REDIS_HOSTS: redis1:192.2.0.1:6379:0:changeme
+      REDIS_HOSTS: redis1:192.0.2.1:6379:0:changeme

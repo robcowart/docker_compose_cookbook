@@ -17,13 +17,13 @@
 version: '3'
 services:
   registry:
-    image: registry:2.7.0
+    image: registry:2.7.1
     container_name: registry
     restart: unless-stopped
     hostname: registry
     network_mode: bridge
     ports:
-      - 5000:5000
+      - 5000:5000/tcp
     volumes:
       - /var/lib/registry:/var/lib/registry
       #- /etc/registry/certs:/certs

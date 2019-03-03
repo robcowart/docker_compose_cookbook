@@ -109,7 +109,7 @@ services:
       KAPACITOR_INFLUXDB_0_ENABLED: 'true'
       KAPACITOR_INFLUXDB_0_DEFAULT: 'true'
       KAPACITOR_INFLUXDB_0_NAME: 'localhost'
-      KAPACITOR_INFLUXDB_0_URLS_0: http://192.2.0.1:8086
+      KAPACITOR_INFLUXDB_0_URLS_0: http://192.0.2.1:8086
       #KAPACITOR_INFLUXDB_0_USERNAME: 
       #KAPACITOR_INFLUXDB_0_PASSWORD: 
       #KAPACITOR_INFLUXDB_0_TIMEOUT: 0
@@ -221,7 +221,7 @@ services:
       KAPACITOR_SNMPTRAP_ENABLED: 'true'
       
       # The host:port address of the SNMP trap server
-      KAPACITOR_SNMPTRAP_ADDR: 192.2.0.1:162
+      KAPACITOR_SNMPTRAP_ADDR: 192.0.2.1:162
       
       # The community to use for traps
       KAPACITOR_SNMPTRAP_COMMUNITY: public

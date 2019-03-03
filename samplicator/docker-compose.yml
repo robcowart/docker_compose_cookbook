@@ -16,43 +16,64 @@
 
 version: '3'
 services:
+  # The usage convention for samplicate is:
+  #   $ samplicate [<option>...] [<destination>...]
+  #
+  # The following <option> parameters are available:
+  #   -d <level>       to set the debugging level
+  #   -s <address>     to set interface address on which to listen for incoming packets (default any)
+  #   -p <port>        to set the UDP port on which to listen for incoming packets (default 2000)
+  #   -b <buflen>      size of receive buffer (default 65536)
+  #   -c <configfile>  specify a config file to read
+  #   -x <delay>       to specify a transmission delay after each packet, in units of microseconds
+  #   -S               maintain (spoof) source addresses
+  #   -n               don't compute UDP checksum (only relevant with -S)
+  #   -f               fork program into background
+  #   -m <pidfile>     write the process ID to a file
+  #   -4               IPv4 only
+  #   -6               IPv6 only
+  #   -h               to print a usage message and exit
+  #   -u <pdulen>      size of max pdu on listened socket (default 65536)
+  #
+  # Each <destination> is specified as <addr>[/<port>[/<interval>[,ttl]]]
+  #   <addr>  IP address of the receiver
+  #   <port>  port UDP number of the receiver (default 2000)
+  #   <freq>  number of received datagrams between successive copied datagrams for this receiver.
+  #   <ttl>   The TTL (IPv4) or hop-limit (IPv6) for outgoing datagrams.
+
   # The following services are examples for forwarding common UDP packets to multiple sources.
-  #   -s  The IP address on which to listen for UDP packets.
-  #   -p  The port number on which to listen for UDP packets.
-  #   -d  Sets the debug level.
-  #   <ipaddr/port>...  The IP address and port to which packets should be forwarded.
   
   samplicator-netflow:
     image: robcowart/samplicator:1.0.0_1.3.8rc1
     container_name: samplicator-netflow
     restart: unless-stopped
     network_mode: host
-    command: -s 192.2.0.1 -p 2055 -d 0 127.0.0.1/2055 192.2.0.111/2055
+    command: -s 192.0.2.1 -p 2055 -S -d 0 127.0.0.1/2055 192.0.2.111/2055
 
   samplicator-ipfix:
     image: robcowart/samplicator:1.0.0_1.3.8rc1
     container_name: samplicator-ipfix
     restart: unless-stopped
     network_mode: host
-    command: -s 192.2.0.1 -p 4739 -d 0 127.0.0.1/4739 192.2.0.111/4739
+    command: -s 192.0.2.1 -p 4739 -S -d 0 127.0.0.1/4739 192.0.2.111/4739
     
   samplicator-sflow:
     image: robcowart/samplicator:1.0.0_1.3.8rc1
     container_name: samplicator-sflow
     restart: unless-stopped
     network_mode: host
-    command: -s 192.2.0.1 -p 6343 -d 0 127.0.0.1/6343 192.2.0.111/6343
+    command: -s 192.0.2.1 -p 6343 -S -d 0 127.0.0.1/6343 192.0.2.111/6343
 
   samplicator-syslog:
     image: robcowart/samplicator:1.0.0_1.3.8rc1
     container_name: samplicator-syslog
     restart: unless-stopped
     network_mode: host
-    command: -s 192.2.0.1 -p 514 -d 0 127.0.0.1/514 192.2.0.111/514
+    command: -s 192.0.2.1 -p 514 -S -d 0 127.0.0.1/514 192.0.2.111/514
 
   samplicator-snmptrap:
     image: robcowart/samplicator:1.0.0_1.3.8rc1
     container_name: samplicator-snmptrap
     restart: unless-stopped
     network_mode: host
-    command: -s 192.2.0.1 -p 162 -d 0 127.0.0.1/162 192.2.0.111/162
+    command: -s 192.0.2.1 -p 162 -S -d 0 127.0.0.1/162 192.0.2.111/162

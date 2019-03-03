@@ -23,8 +23,8 @@ services:
     hostname: nginx
     network_mode: bridge
     ports:
-      - 80:80
-      - 443:443
+      - 80:80/tcp
+      - 443:443/tcp
     volumes:
       - /etc/nginx:/etc/nginx
     #environment:
