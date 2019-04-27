@@ -17,13 +17,13 @@
 version: '3'
 services:
   redis:
-    image: redis:5.0.3
+    image: redis:5.0.4
     container_name: redis
     restart: unless-stopped
     hostname: redis
     network_mode: bridge
     ports:
-      - 6379:6379
+      - 6379:6379/tcp
     #environment:
     command: >
       --slaveof 10.0.0.2 6379
@@ -313,8 +313,6 @@ services:
       #
       # slave-announce-ip 5.5.5.5
       # slave-announce-port 1234
-
-
 
 
       # Require clients to issue AUTH <PASSWORD> before processing any other commands.
