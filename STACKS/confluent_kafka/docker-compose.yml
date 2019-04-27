@@ -19,7 +19,7 @@ networks:
   kafka:
 services:
   zookeeper:
-    image: confluentinc/cp-zookeeper:5.1.2-1
+    image: confluentinc/cp-zookeeper:5.2.1-1
     container_name: zookeeper
     restart: 'no'
     hostname: zookeeper
@@ -75,7 +75,7 @@ services:
       ZOOKEEPER_SERVERS: zookeeper:2888:3888
 
   kafka:
-    image: confluentinc/cp-kafka:5.1.2-1
+    image: confluentinc/cp-kafka:5.2.1-1
     container_name: kafka
     depends_on:
       - zookeeper
@@ -179,7 +179,7 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
 
   kafka_manager:
-    image: hlebalbau/kafka-manager:1.3.3.22
+    image: hlebalbau/kafka-manager:2.0.0.2
     container_name: kafka-manager
     depends_on:
       - zookeeper
@@ -195,7 +195,7 @@ services:
     command: -Dpidfile.path=/dev/null
 
   zoonavigator-api:
-    image: elkozmon/zoonavigator-api:0.6.0
+    image: elkozmon/zoonavigator-api:0.6.1
     container_name: zoonavigator-api
     depends_on:
       - zookeeper
@@ -309,7 +309,7 @@ services:
       #ZK_SSL_TRUSTSTORE_PASSWORD: 
 
   zoonavigator-web:
-    image: elkozmon/zoonavigator-web:0.6.0
+    image: elkozmon/zoonavigator-web:0.6.1
     container_name: zoonavigator-web
     depends_on:
       - zoonavigator-api
