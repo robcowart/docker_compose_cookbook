@@ -19,7 +19,7 @@ networks:
   elastic:
 services:
   elasticsearch-oss:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.6.1
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.0.1
     container_name: elasticsearch-oss
     restart: 'no'
     hostname: elasticsearch
@@ -53,13 +53,17 @@ services:
 
       network.host: 0.0.0.0
       http.port: 9200
+      discovery.type: 'single-node'
+
+      indices.query.bool.max_clause_count: 8192
+      search.max_buckets: 100000
 
       action.destructive_requires_name: 'true'
 
-      reindex.remote.whitelist: '[ "*.*.*.*:*" ]'
+      reindex.remote.whitelist: '*.*.*.*:*'
 
   kibana-oss:
-    image: docker.elastic.co/kibana/kibana-oss:6.6.1
+    image: docker.elastic.co/kibana/kibana-oss:7.0.1
     container_name: kibana-oss
     depends_on:
       - elasticsearch-oss
@@ -243,7 +247,7 @@ services:
 
       # Set the value of this setting to true to suppress all logging output other than error messages.
       # Default: false
-      LOGGING_QUIET: 'true'
+      #LOGGING_QUIET: 'true'
 
       # Set the value of this setting to true to suppress all logging output.
       # Default: false
