@@ -17,7 +17,7 @@
 version: '3'
 services:
   chronograf:
-    image: chronograf:1.7.11
+    image: chronograf:1.7.12
     container_name: chronograf
     restart: unless-stopped
     hostname: chronograf

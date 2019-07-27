@@ -17,7 +17,7 @@
 version: '3'
 services:
   kapacitor:
-    image: kapacitor:1.5.2
+    image: kapacitor:1.5.3
     container_name: kapacitor
     restart: unless-stopped
     hostname: kapacitor

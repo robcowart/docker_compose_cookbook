@@ -19,7 +19,7 @@ networks:
   tick:
 services:
   influxdb:
-    image: influxdb:1.7.6
+    image: influxdb:1.7.7
     container_name: influxdb
     restart: 'no'
     ulimits:
@@ -390,7 +390,7 @@ services:
       #INFLUXDB_TLS_MAX_VERSION: tls1.2
 
   chronograf:
-    image: chronograf:1.7.11
+    image: chronograf:1.7.12
     container_name: chronograf
     depends_on:
       - influxdb
@@ -483,7 +483,7 @@ services:
       #PUBLIC_URL: http://127.0.0.1:8888
 
   kapacitor:
-    image: kapacitor:1.5.2
+    image: kapacitor:1.5.3
     container_name: kapacitor
     depends_on:
       - influxdb
@@ -624,7 +624,7 @@ services:
       KAPACITOR_STATS_RETENTION_POLICY: autogen
 
   grafana:
-    image: grafana/grafana:6.1.4
+    image: grafana/grafana:6.2.5
     container_name: grafana
     depends_on:
       - influxdb
