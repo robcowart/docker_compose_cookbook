@@ -17,7 +17,7 @@
 version: '3'
 services:
   redis:
-    image: redis:5.0.4
+    image: redis:5.0.5
     container_name: redis
     restart: unless-stopped
     hostname: redis
