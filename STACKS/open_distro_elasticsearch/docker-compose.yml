@@ -19,7 +19,7 @@ networks:
   open-distro:
 services:
   od-elasticsearch:
-    image: amazon/opendistro-for-elasticsearch:0.8.0
+    image: amazon/opendistro-for-elasticsearch:1.0.2
     container_name: od-elasticsearch
     restart: 'no'
     hostname: elasticsearch
@@ -48,20 +48,21 @@ services:
       node.data: 'true'
       node.ingest: 'true'
 
-      #node.attr.avail_zone: az1
-      #node.attr.data_temp: hot
-
       bootstrap.memory_lock: 'true'
 
       network.host: 0.0.0.0
       http.port: 9200
+      discovery.type: 'single-node'
+
+      indices.query.bool.max_clause_count: 8192
+      search.max_buckets: 100000
 
       action.destructive_requires_name: 'true'
 
       reindex.remote.whitelist: '*.*.*.*:*'
 
   od-kibana:
-    image: amazon/opendistro-for-elasticsearch-kibana:0.8.0
+    image: amazon/opendistro-for-elasticsearch-kibana:1.0.2
     container_name: od-kibana
     depends_on:
       - od-elasticsearch
