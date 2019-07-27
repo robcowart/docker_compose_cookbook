@@ -19,7 +19,7 @@ networks:
   elastic:
 services:
   elasticsearch-oss:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.0.1
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.2.0
     container_name: elasticsearch-oss
     restart: 'no'
     hostname: elasticsearch
@@ -46,9 +46,6 @@ services:
       node.data: 'true'
       node.ingest: 'true'
 
-      #node.attr.avail_zone: az1
-      #node.attr.data_temp: hot
-
       bootstrap.memory_lock: 'true'
 
       network.host: 0.0.0.0
@@ -63,7 +60,7 @@ services:
       reindex.remote.whitelist: '*.*.*.*:*'
 
   kibana-oss:
-    image: docker.elastic.co/kibana/kibana-oss:7.0.1
+    image: docker.elastic.co/kibana/kibana-oss:7.2.0
     container_name: kibana-oss
     depends_on:
       - elasticsearch-oss
