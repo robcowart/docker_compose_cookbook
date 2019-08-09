@@ -25,7 +25,9 @@ services:
     ports:
       - 3000:3000/tcp
     volumes:
+      # mkdir /var/lib/grafana && chown -R 472:472 /var/lib/grafana
       - /var/lib/grafana:/var/lib/grafana
+      # mkdir /var/log/grafana && chown -R 472:472 /var/log/grafana
       - /var/log/grafana:/var/log/grafana
       - /etc/grafana/provisioning:/etc/grafana/provisioning
     environment:

@@ -32,7 +32,9 @@ services:
       # Transport
       - 9300:9300/tcp
     volumes:
+      # mkdir /var/lib/elasticsearch && chown -R 1000:1000 /var/lib/elasticsearch
       - /var/lib/elasticsearch:/usr/share/elasticsearch/data
+      # mkdir /var/log/elasticsearch && chown -R 1000:1000 /var/log/elasticsearch
       - /var/log/elasticsearch:/usr/share/elasticsearch/logs
     environment:
       ES_JAVA_OPTS: '-Xms4g -Xmx4g'
