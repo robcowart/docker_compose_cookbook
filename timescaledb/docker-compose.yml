@@ -1,0 +1,14 @@
+version: '3'
+services:
+  timescaledb:
+    image: timescale/timescaledb:1.4.1-pg11
+    container_name: timescaledb
+    restart: unless-stopped
+    hostname: timescaledb
+    network_mode: bridge
+    ports:
+      - 5432:5432/tcp
+    volumes:
+      - /var/lib/postgresql/data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: changeme
