@@ -1,0 +1,73 @@
+#------------------------------------------------------------------------------
+# Copyright 2019 Robert Cowart
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#------------------------------------------------------------------------------
+
+version: '3'
+services:
+  pgadmin:
+    image: dpage/pgadmin4:4.11
+    container_name: pgadmin
+    restart: unless-stopped
+    hostname: pgadmin
+    network_mode: bridge
+    ports:
+      - 80:80/tcp
+      - 443:443/tcp
+    
+    volumes:
+      # This is the working directory in which pgAdmin stores session data, user files, configuration files, and it's
+      # configuration database. Mapping this directory onto the host machine gives you an easy way to maintain
+      # configuration between invocations of the container.
+      - /var/lib/pgadmin:/var/lib/pgadmin
+
+      # This file can be used to override configuration settings in pgAdmin. Settings found in config.py can be
+      # overridden with deployment specific values if required.
+      #- /etc/pgadmin/config_local.json:/pgadmin4/config_local.json
+
+      # If this file is mapped, server definitions found in it will be loaded at launch time. This allows connection
+      # information to be pre-loaded into the instance of pgAdmin in the container.Note that server definitions are
+      # only loaded on first launch, i.e. when the configuration database is created, and not on subsequent launches
+      # using the same configuration database. Note that server definitions are only loaded on first launch, i.e. when
+      # the configuration database is created, and not on subsequent launches using the same configuration database.
+      #- /etc/pgadmin/servers.json:/pgadmin4/servers.json
+
+      # If TLS is enabled, this file will be used as the servers TLS certificate.
+      #- /etc/pgadmin/certificate.cert:/certs/server.cert
+
+      # If TLS is enabled, this file will be used as the key file for the servers TLS certificate.
+      #- /etc/pgadmin/certificate.key:/certs/server.key
+
+    environment:
+      # This is the email address used when setting up the initial administrator account to login to pgAdmin. This
+      # variable is required and must be set at launch time.
+      PGADMIN_DEFAULT_EMAIL: 'email@mydomain.com'
+
+      # This is the password used when setting up the initial administrator account to login to pgAdmin. This variable
+      # is required and must be set at launch time.
+      PGADMIN_DEFAULT_PASSWORD: 'changeme'
+
+      # If left un-set, the container will listen on port 80 for connections in plain text. If set to any value, the
+      # container will listen on port 443 for TLS connections. When TLS is enabled, a certificate and key must be
+      # provided. Typically these should be stored on the host file system and mounted from the container. The expected
+      # paths are /certs/server.crt and /certs/server.key
+      #PGADMIN_ENABLE_TLS: 'false'
+
+      # Allows the port that the server listens on to be set to a specific value rather than using the default.
+      # Default: 80 or 443 (if TLS is enabled)
+      #PGADMIN_LISTEN_PORT: 80
+
+      # Adjust the number of threads the Gunicorn server uses to handle incoming requests. This should typically be
+      # left as-is, except in highly loaded systems where it may be increased.
+      #GUNICORN_THREADS: 25
