@@ -1,0 +1,524 @@
+version: '3'
+services:
+  streamsets-dc:
+    image: streamsets/datacollector:3.11.0-01
+    container_name: streamsets-dc
+    restart: unless-stopped
+    network_mode: bridge
+    ports:
+      - 18630:18630/tcp
+    volumes:
+      # mkdir /var/lib/sdc && chown -R 20159:20159 /var/lib/sdc
+      # mkdir /var/log/sdc && chown -R 20159:20159 /var/log/sdc
+      - /var/lib/sdc:/data
+      - /var/log/sdc:/logs
+    environment:
+      #SDC_JAVA_OPTS: ''
+
+      # sdc.base.http.url=http://<hostname>:<port>
+      #   The base URL of the datacollector, used to create email alert messages. If not set
+      #   http://<hostname>:<http.port> is used. <hostname> is either taken from http.bindHost or resolved using
+      #   'hostname -f' if not configured.
+      #SDC_CONF_SDC_BASE_HTTP_URL: 'http://<hostname>:18630'
+
+      # http.bindHost=0.0.0.0
+      #   Hostname or IP address that data collector will bind to.
+      SDC_CONF_HTTP_BINDHOST: 0.0.0.0
+
+      # http.maxThreads=200
+      #   Maximum number of HTTP servicing threads.
+      #SDC_CONF_HTTP_MAXTHREADS: 200
+
+      # http.port=18630
+      #   The port the data collector runs the SDC HTTP endpoint. If different than -1, the SDC will run on this port.
+      #   If 0, the SDC will pick up a random port. If the https.port is different that -1 or 0 and http.port is
+      #   different than -1 or 0, the HTTP endpoint will redirect to the HTTPS endpoint.
+      SDC_CONF_HTTP_PORT: 18630
+
+      # https.port=-1
+      #   The port the data collector runs the SDC HTTPS endpoint. If different that -1, the SDC will run over SSL on
+      #   this port If 0, the SDC will pick up a random port.
+      SDC_CONF_HTTPS_PORT: -1 
+
+      # http2.enable=false
+      #   Enables HTTP/2 support for the SDC UI/REST API. If you are using any clients that do not support ALPN for
+      #   protocol negotiation, leave this option disabled.
+      SDC_CONF_HTTP2_ENABLE: 'false'
+
+      # http.session.max.inactive.interval=86400
+      #   HTTP Session Timeout. Max period of inactivity, after which the HTTP session is invalidated, in seconds.
+      #   Default value is 86400 seconds (24 hours). Value -1 means no timeout
+      SDC_CONF_HTTP_SESSION_MAX_INACTIVE_INTERVAL: 86400
+
+      # http.enable.forwarded.requests=false
+      #   SDC will handle X-Forwarded-For, X-Forwarded-Proto, X-Forwarded-Port headers issued by a reverse proxy such
+      #   as HAProxy, ELB, nginx when set to true. Set to true when hosting SDC behind a reverse proxy / load balancer.
+      SDC_CONF_HTTP_ENABLE_FORWARDED_REQUESTS: 'false'
+
+
+
+      # https.keystore.path=keystore.jks
+      #   Java keystore file, in the SDC 'etc/' configuration directory.
+      #SDC_CONF_HTTPS_KEYSTORE_PATH: keystore.jks
+
+      # https.keystore.password=${file("keystore-password.txt")}
+      #   Password for the keystore file. By default, the password is loaded from the 'keystore-password.txt' from the
+      #   SDC 'etc/' configuration directory
+      #SDC_CONF_HTTPS_KEYSTORE_PASSWORD: '${file("keystore-password.txt")}'
+
+      # https.cluster.keystore.path=/opt/security/jks/sdc-keystore.jks
+      #   Path to keystore file on worker node. This should always be an absolute location.
+      #SDC_CONF_HTTPS_CLUSTER_KEYSTORE_PATH: '/opt/security/jks/sdc-keystore.jks'
+
+      # https.cluster.keystore.password=${file("/opt/security/jks/keystore-password.txt")}
+      #   Password for keystore file on worker.
+      #SDC_CONF_HTTPS_CLUSTER_KEYSTORE_PASSWORD: '${file("/opt/security/jks/keystore-password.txt")}'
+
+
+
+      # https.truststore.path=
+      #   Java truststore file on gateway sdc which stores certificates to trust identity of workers
+      #SDC_CONF_HTTPS_TRUSTSTORE_PATH: 
+
+      # https.truststore.password=
+      #   Password for truststore file
+      #SDC_CONF_HTTPS_TRUSTSTORE_PASSWORD: 
+
+      # https.cluster.truststore.path=/opt/security/jks/sdc-truststore.jks
+      #   Path to truststore file on worker node. This should always be an absolute location.
+      #SDC_CONF_HTTPS_CLUSTER_TRUSTSTORE_PATH: '/opt/security/jks/sdc-truststore.jks'
+
+      # https.cluster.truststore.password=${file("/opt/security/jks/truststore-password.txt")}
+      #   Password for truststore file on worker
+      #SDC_CONF_HTTPS_CLUSTER_TRUSTSTORE_PASSWORD: '${file("/opt/security/jks/truststore-password.txt")}'
+
+
+
+      # http.authentication=form
+      #   The authentication for the HTTP endpoint of the data collector. Valid values are: 'none', 'basic', 'digest',
+      #   or 'form'.
+      #SDC_CONF_HTTP_AUTHENTICATION: form
+
+      # http.authentication.login.module=file
+      #   Authentication Login Module. Valid values are: 'file' and 'ldap'.
+      #   For 'file', the authentication and role information is read from a property file (etc/basic-realm.properties,
+      #   etc/digest-realm.properties or etc/form-realm.properties based on the 'http.authentication' value).
+      #   For 'ldap', the authentication and role information is read from a LDAP Server and LDAP connection
+      #   information is read from etc/ldap-login.conf.
+      #SDC_CONF_HTTP_AUTHENTICATION_LOGIN_MODULE: file
+
+      # http.digest.realm=local-realm
+      #   The realm used for authentication. A file with the realm name and '.properties' extension must exist in the
+      #   data collector configuration directory. If this property is not set, the realm name is
+      #   '<http.authentication>-realm'
+      #SDC_CONF_HTTP_DIGEST_REALM: local-realm 
+
+      # http.realm.file.permission.check=true
+      #   Check the permissions of the realm file should be owner only
+      #SDC_CONF_HTTP_REALM_FILE_PERMISSION_CHECK: 'true' 
+
+      # http.authentication.ldap.role.mapping=
+      #   LDAP group to Data Collector role mapping. The mapping is specified as the following pattern:
+      #     <ldap-group>:<sdc-role>(,<sdc-role>)*(;<ldap-group>:<sdc-role>(,<sdc-role>)*)*
+      #   e.g.
+      #     Administrator:admin;Manager:manager;DevOP:creator;Tester:guest;
+      #SDC_CONF_HTTP_AUTHENTICATION_LDAP_ROLE_MAPPING: 
+
+      # ldap.login.module.name=ldap
+      #   LDAP login module name as present in the JAAS config file. If no value is specified, the login module name is
+      #   assumed to be "ldap".
+      #SDC_CONF_LDAP_LOGIN_MODULE_NAME: ldap 
+
+      # HTTP access control (CORS)
+      # http.access.control.allow.origin=*
+      #SDC_CONF_HTTP_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
+      
+      # http.access.control.allow.headers=origin, content-type, cache-control, pragma, accept, authorization, x-requested-by, x-ss-user-auth-token, x-ss-rest-call
+      #SDC_CONF_HTTP_ACCESS_CONTROL_ALLOW_HEADERS: 'origin, content-type, cache-control, pragma, accept, authorization, x-requested-by, x-ss-user-auth-token, x-ss-rest-call'
+      
+      # http.access.control.allow.methods=GET, POST, PUT, DELETE, OPTIONS, HEAD
+      #SDC_CONF_HTTP_ACCESS_CONTROL_ALLOW_METHODS: 'GET, POST, PUT, DELETE, OPTIONS, HEAD'
+
+
+
+      # kerberos.client.enabled=false
+      #   Runs the data collector within a Kerberos session which is propagated to all stages. This is useful for
+      #   stages that require Kerberos authentication with the services with which they interact.
+      #SDC_CONF_KERBEROS_CLIENT_ENABLED: 'false'
+
+      # kerberos.client.principal=sdc/_HOST@EXAMPLE.COM
+      #   The kerberos principal to use for the Kerberos session. It should be a service principal. If the hostname
+      #   part of the service principal is '_HOST' or '0.0.0.0', the hostname will be replaced with the actual complete
+      #   hostname of the data collector as advertised by the unix command 'hostname -f'
+      #SDC_CONF_KERBEROS_CLIENT_PRINCIPAL: ''
+
+      # kerberos.client.keytab=sdc.keytab
+      #   The location of the keytab file for the specified principal. If the path is relative, the keytab file will be
+      #   looked under the data collector configuration directory.
+      #SDC_CONF_KERBEROS_CLIENT_KEYTAB: 'sdc.keytab'
+
+
+
+      # parser.limit=1048576
+      #   Specifies the buffer size for Overrun parsers - including JSON, XML and CSV. This parameter is specified in
+      #   bytes, and must be greater than 1048576 bytes (which is the default size).
+      SDC_CONF_PARSER_LIMIT: 4194304
+
+      
+      
+      # preview.maxBatchSize=10
+      #SDC_CONF_PREVIEW_MAXBATCHSIZE: 10
+
+      # preview.maxBatches=10
+      #SDC_CONF_PREVIEW_MAXBATCHES: 10
+
+
+
+      # production.maxBatchSize=1000
+      #SDC_CONF_MAXBATCHSIZE: 1000
+
+      # production.maxErrorRecordsPerStage=100
+      #   This option determines the number of error records, per stage, that will be retained in memory when the
+      #   pipeline is running. If set to zero, error records will not be retained in memory. If the specified limit is
+      #   reached the oldest records will be discarded to make room for the newest one.
+      #SDC_CONF_PRODUCTION_MAXERRORRECORDSPERSTAGE: 100
+
+      # production.maxPipelineErrors=100
+      #   This option determines the number of pipeline errors that will be retained in memory when the pipeline is
+      #   running. If set to zero, pipeline errors will not be retained in memory. If the specified limit is reached
+      #   the oldest error will be discarded to make room for the newest one.
+      #SDC_CONF_PRODUCTION_MAXPIPELINEERRORS: 100
+
+
+      
+      # max.logtail.concurrent.requests=5
+      #   Max number of concurrent REST calls allowed for the /rest/v1/admin/log endpoint.
+      #SDC_CONF_MAX_LOGTAIL_CONCURRENT_REQUESTS: 5
+
+      # max.webSockets.concurrent.requests=15
+      #   Max number of concurrent WebSocket calls allowed.
+      #SDC_CONF_MAX_WEBSOCKETS_CONCURRENT_REQUESTS: 15
+
+
+
+      # pipeline.access.control.enabled=false
+      #   Pipeline Sharing / ACLs
+      #SDC_CONF_PIPELINE_ACCESS_CONTROL_ENABLED: 'false'
+
+
+
+      # ui.header.title=
+      #   Customize header title for SDC UI. You can pass any HTML tags here. Example:
+      #     For Text  -  <span class="navbar-brand">New Brand Name</span>
+      #     For Image -  <img src="assets/add.png">
+      #SDC_CONF_UI_HEADER_TITLE: 
+
+      # ui.local.help.base.url=/docs
+      #SDC_CONF_UI_LOCAL_HELP_BASE_URL: '/docs'
+
+      # ui.hosted.help.base.url=https://www.streamsets.com/documentation/datacollector/3.11.0-SNAPSHOT/userguide/help
+      #SDC_CONF_UI_HOSTED_HELP_BASE_URL: 'https://www.streamsets.com/documentation/datacollector/3.11.0-SNAPSHOT/userguide/help'
+
+      # ui.refresh.interval.ms=2000
+      #SDC_CONF_UI_REFRESH_INTERVAL_MS: 2000
+
+      # ui.jvmMetrics.refresh.interval.ms=4000
+      #SDC_CONF_UI_JVMMETRICS_REFRESH_INTERVAL_MS: 4000
+
+      # ui.enable.webSocket=true
+      #   If true SDC UI will use WebSocket to fetch pipeline status/metrics/alerts otherwise UI will poll every few
+      #   seconds to get the Pipeline status/metrics/alerts.
+      #SDC_CONF_UI_ENABLE_WEBSOCKET: 'true'
+
+      # ui.undo.limit=10
+      #   Number of changes supported by undo/redo functionality. UI archives Pipeline Configuration/Rules in browser
+      #   memory to support undo/redo functionality.
+      #SDC_CONF_UI_UNDO_LIMIT: 10
+
+      # SMTP configuration to send alert emails. All properties starting with 'mail.' are used to create the JavaMail
+      # session, supported protocols are 'smtp' & 'smtps'.
+      
+      # mail.transport.protocol=smtp
+      #SDC_CONF_MAIL_TRANSPORT_PROTOCOL: smtp
+
+      # mail.smtp.host=localhost
+      #SDC_CONF_MAIL_SMTP_HOST: localhost
+
+      # mail.smtp.port=25
+      #SDC_CONF_MAIL_SMTP_PORT: 25
+
+      # mail.smtp.auth=false
+      #SDC_CONF_MAIL_SMTP_AUTH: 'false'
+
+      # mail.smtp.starttls.enable=false
+      #SDC_CONF_MAIL_SMTP_STARTTLS_ENABLE: 'false'
+
+      # mail.smtps.host=localhost
+      #SDC_CONF_MAIL_SMTPS_HOST: localhost
+
+      # mail.smtps.port=465
+      #SDC_CONF_MAIL_SMTPS_PORT: 465
+
+      # mail.smtps.auth=false
+      #SDC_CONF_MAIL_SMTPS_AUTH: 'false'
+
+
+      
+      # If 'mail.smtp.auth' or 'mail.smtps.auth' are to true, these properties are used for the user/password
+      # credentials, ${file("email-password.txt")} will load the value from the 'email-password.txt' file in the config
+      # directory (where this file is)
+
+      # xmail.username=foo
+      #SDC_CONF_XMAIL_USERNAME: 
+      
+      # xmail.password=${file("email-password.txt")}
+      #SDC_CONF_: '${file("email-password.txt")}'
+      
+      # xmail.from.address=sdc@localhost
+      #   FROM email address to use for the messages.
+      #SDC_CONF_XMAIL_FROM_ADDRESS: 
+
+
+
+      # runtime.conf.location=embedded
+      #   Indicates the location where runtime configuration properties can be found. Value 'embedded' implies that the
+      #   runtime configuration properties are present in this file and are prefixed with 'runtime.conf_'. A value
+      #   other than 'embedded' is treated as the name of a properties file from which the runtime configuration
+      #   properties must be picked up. Note that the properties should not be prefixed with 'runtime.conf_' in this
+      #   case.
+      #SDC_CONF_RUNTIME_CONF_LOCATION: embedded
+
+
+
+      # Java Security properties
+      #   Any configuration prefixed with 'java.security.<property>' will be set on the static instance
+      #   java.security.Security as part of SDC bootstrap process. This will change JVM configuration and should not be
+      #   used when embedding and running multiple SDC instances inside the same JVM.
+
+      # java.security.networkaddress.cache.ttl=0
+      #   We're explicitly overriding this to zero as JVM will default to -1 if security manager is active.
+      #SDC_CONF_JAVA_SECURITY_NETWORKADDRESS_CACHE_TTL: 0
+
+
+
+      # Security Manager
+      #   By default when Security Manager is enabled, SDC will use Java one that only follows the specified policy.
+
+      # security_manager.sdc_manager.enable=true
+      #   Enable SDC Security Manager that will always prevent access to SDC's internal directories to all stages (e.g.
+      #   data dir, ...). Please note that there are certain JVM bugs that this manager might hit, especially on some
+      #   older JVM versions.
+      #SDC_CONF_SECURITY_MANAGER_SDC_MANAGER_ENABLE: 'true'
+
+      # security_manager.sdc_dirs.exceptions=$SDC_CONF/ldap-login.conf
+      #   When Security manager is enabled SDC will by default prohibits access to it's internal directories regardless
+      #   of what the security policy specifies. The following properties allow specific access to given files inside
+      #   protected directories.
+      #SDC_CONF_SECURITY_MANAGER_SDC_DIRS_EXCEPTIONS: '$SDC_CONF/ldap-login.conf'
+
+      # security_manager.sdc_dirs.exceptions=$SDC_CONF/ldap-login.conf
+      #   General exceptions - use with caution, all stage libraries will be able to access those files. Access to
+      #   ldap-login.conf is sadly required by Hadoop's UserGroupInfo class
+      #SDC_CONF_SECURITY_MANAGER_SDC_DIRS_EXCEPTIONS: '$SDC_CONF/ldap-login.conf'
+
+      # security_manager.sdc_dirs.exceptions.lib.streamsets-datacollector-jks-credentialstore-lib=$SDC_CONF/jks-credentialStore.pkcs12
+      #   Exceptions for specific stage libraries. Our documentation recommends default name for credential store
+      #   inside ETC directory
+      #SDC_CONF_SECURITY_MANAGER_SDC_DIRS_EXCEPTIONS_LIB_STREAMSETS_DATACOLLECTOR_JKS_CREDENTIALSTORE_LIB: '$SDC_CONF/jks-credentialStore.pkcs12'
+
+
+
+      # Stage specific configuration(s)
+      #   The following config properties are for particular stages, please refer to their documentation for further
+      #   details.
+
+      # stage.conf_hadoop.always.impersonate.current.user=true
+      #   Uncomment to enforce Hadoop components in SDC to always impersonate current user rather then use the
+      #   impersonation configuration option. Current user is a user who either started the pipeline or run preview.
+      #SDC_CONF_STAGE_CONF_HADOOP_ALWAYS_IMPERSONATE_CURRENT_USER: 'true'
+
+      # stage.conf_hadoop.always.lowercase.user=true
+      #   Uncomment to enforce impersonated user name to be lower cased.
+      #SDC_CONF_STAGE_CONF_HADOOP_ALWAYS_LOWERCASE_USER: 'true'
+
+      # Shell executor
+      # stage.conf_com.streamsets.pipeline.stage.executor.shell.impersonation_mode=CURRENT_USER
+      #   Controls impersonation mode
+      #SDC_CONF_STAGE_CONF_COM_STREAMSETS_PIPELINE_STAGE_EXECUTOR_SHELL_IMPERSONATION_MODE: CURRENT_USER
+      
+      # stage.conf_com.streamsets.pipeline.stage.executor.shell.shell=sh
+      #   Relative or absolute path to shell that should be used to execute the shell script
+      #SDC_CONF_STAGE_CONF_COM_STREAMSETS_PIPELINE_STAGE_EXECUTOR_SHELL_SHELL: sh
+      
+      # stage.conf_com.streamsets.pipeline.stage.executor.shell.sudo=sudo
+      #   Relative or absolute path to sudo command
+      #SDC_CONF_STAGE_CONF_COM_STREAMSETS_PIPELINE_STAGE_EXECUTOR_SHELL_SUDO: sudo
+
+      # stage.conf_com.streamsets.pipeline.stage.jdbc.drivers.load=mysql.jdbc.Driver
+      #   JDBC Drivers that should always be auto-loaded even if they are not JDBC 4 compliant or fails to load (comma
+      #   separated list)
+      #SDC_CONF_STAGE_CONF_COM_STREAMSETS_PIPELINE_STAGE_JDBC_DRIVERS_LOAD: ''
+
+
+
+      # Antenna Doctor
+      #   Antenna Doctor is a rule-based engine designed to help end-user self-diagnose most common issues and suggest
+      #   potential fixes and workarounds.
+
+      # antennadoctor.enable=false
+      #   Uncomment to disable Antenna Doctor completely.
+      #SDC_CONF_ANTENNADOCTOR_ENABLE: 'false'
+
+      # antennadoctor.update.enable=false
+      #   Uncomment to disable periodical updates of the knowledge base from internet.
+      #SDC_CONF_ANTENNADOCTOR_UPDATE_ENABLE: 'false'
+
+      # antennadoctor.update.delay=5
+      #   Number of minutes to wait after start before starting update loop.
+      #SDC_CONF_ANTENNADOCTOR_UPDATE_DELAY: 5
+
+      # antennadoctor.update.period=720
+      #   Check for knowledge base updates from the internet every X minutes.
+      #SDC_CONF_ANTENNADOCTOR_UPDATE_PERIOD: 720
+
+      # antennadoctor.override.enable=true
+      #   (Development mode only) Uncomment to allow doctor to load (and periodically scan for changes to
+      #   antenna-doctor-override.json). Helpful for custom rule development. Auto disables update capability.
+      #SDC_CONF_ANTENNADOCTOR_OVERRIDE_ENABLE: 'true'
+
+
+
+      # observer.queue.size=100
+      #   The size of the queueName where the pipeline queues up data rule evaluation requests. Each request is for a
+      #   stream and contains sampled records for all rules that apply to that lane.
+      #SDC_CONF_OBSERVER_QUEUE_SIZE: 100
+
+      # observer.sampled.records.cache.size=100
+      #   Sampled records which pass evaluation are cached for user to view. This determines the size of the cache and
+      #   there is once cache per data rule
+      #SDC_CONF_OBSERVER_SAMPLED_RECORDS_CACHE_SIZE: 100
+
+      # observer.queue.offer.max.wait.time.ms=1000
+      #   The time to wait before dropping a data rule evaluation request if the observer queueName is full.
+      #SDC_CONF_OBSERVER_QUEUE_OFFER_MAX_WAIT_TIME_MS: 1000
+
+
+
+      # max.stage.private.classloaders=50
+      #  Maximum number of private classloaders to allow in the data collector. Stage that have configuration
+      #  singletons (i.e. Hadoop FS & Hbase) require private classloaders.
+      #SDC_CONF_MAX_STAGE_PRIVATE_CLASSLOADERS: 50
+
+
+
+      # runner.thread.pool.size=50
+      #   Pipeline runner pool. Default value is sufficient to run 22 pipelines. One pipeline requires 5 Threads and
+      #   pipelines share threads using thread pool. Approximate runner thread pool size = (Number of Running
+      #   Pipelines) * 2.2. Increasing this value will not increase parallelisation of individual pipelines.
+      #SDC_CONF_RUNNER_THREAD_POOL_SIZE: 50
+
+      # runner.boot.pipeline.restart=false
+      #   Uncomment to disable starting all previously running pipelines on SDC start up
+      #SDC_CONF_RUNNER_BOOT_PIPELINE_RESTART: 'false'
+
+      # pipeline.max.runners.count=50
+      #   Maximal number of runners (multithreaded pipelines) Maximal number of source-less pipeline instances
+      #   (=runners) that are allowed for a single multi-threaded pipeline.
+      #SDC_CONF_PIPELINE_MAX_RUNNERS_COUNT: 50
+
+
+
+      # package.manager.repository.links=
+      #   A custom location for the package manager repositories. Enter a url or comma-separated list of urls. Official
+      #   Data Collector releases use the following repositories by default:
+      #     http://archives.streamsets.com/datacollector/<version>/tarball/,
+      #     http://archives.streamsets.com/datacollector/<version>/tarball/enterprise/ and
+      #     http://archives.streamsets.com/datacollector/<version>/legacy/
+      #   Data Collector source code builds (master branch) use the following repositories by default:
+      #     http://nightly.streamsets.com/datacollector/latest/tarball/,
+      #     http://nightly.streamsets.com/datacollector/latest/tarball/enterprise/ and
+      #     http://nightly.streamsets.com/datacollector/latest/legacy/
+      #SDC_CONF_PACKAGE_MANAGER_REPOSITORY_LINKS: 
+
+
+
+      # Support bundles
+
+      # bundle.upload.enabled=false
+      #   Uncomment if you need to disable the facility for automatic support bundle upload.
+      SDC_CONF_BUNDLE_UPLOAD_ENABLED: 'false'
+
+      # bundle.upload.on_error=true
+      #   Uncomment to automatically generate and upload bundle on various errors. Enable with caution, uploading
+      #   bundle can be time consuming task (depending on size and internet speed) and pipelines can appear "frozen"
+      #   during the upload especially when many pipelines are failing at the same time.
+      SDC_CONF_BUNDLE_UPLOAD_ON_ERROR: 'false'
+
+
+
+      # System and user stage libraries whitelists and blacklists. If commented out all stagelibraries directories are
+      # used. Given 'system' or 'user', only whitelist or blacklist can be set, if both are set the Data Collector will
+      # fail to start. Specify stage library directories separated by commas.
+      #
+      # The MapR stage libraries are disabled as they require manual installation step. Use setup-mapr script to enable
+      # the desired MapR stage library.
+      #
+      # It's important to keep the blacklist and whitelist properties on a single line, otherwise CSD's control.sh
+      # script and setup-mapr script will not work properly.
+
+      # system.stagelibs.whitelist=
+      #SDC_CONF_SYSTEM_STAGELIBS_WHITELIST: ''
+
+      # system.stagelibs.blacklist=streamsets-datacollector-mapr_5_0-lib,streamsets-datacollector-mapr_5_1-lib,streamsets-datacollector-mapr_5_2-lib,streamsets-datacollector-mapr_6_0-lib,streamsets-datacollector-mapr_6_0-mep4-lib,streamsets-datacollector-mapr_6_0-mep5-lib,streamsets-datacollector-mapr_6_1-lib,streamsets-datacollector-mapr_6_1-mep6-lib,streamsets-datacollector-mapr_spark_2_1_mep_3_0-lib
+      SDC_CONF_SYSTEM_STAGELIBS_BLACKLIST: 'streamsets-datacollector-mapr_5_0-lib,streamsets-datacollector-mapr_5_1-lib,streamsets-datacollector-mapr_5_2-lib,streamsets-datacollector-mapr_6_0-lib,streamsets-datacollector-mapr_6_0-mep4-lib,streamsets-datacollector-mapr_6_0-mep5-lib,streamsets-datacollector-mapr_6_1-lib,streamsets-datacollector-mapr_6_1-mep6-lib,streamsets-datacollector-mapr_spark_2_1_mep_3_0-lib'
+      
+      # user.stagelibs.whitelist=
+      #SDC_CONF_USER_STAGELIBS_WHITELIST: ''
+      
+      # user.stagelibs.blacklist=
+      #SDC_CONF_USER_STAGELIBS_BLACKLIST: ''
+
+
+
+      # stagelibs.classpath.validation.enable=false
+      #   Uncomment to disable best effort validation of each stage library classpath to detect known issues with
+      #   colliding dependencies (such as conflicting versions of the same dependency, ...). Result of the validation
+      #   is by default only printed to log.
+      #SDC_CONF_STAGELIBS_CLASSPATH_VALIDATION_ENABLE: 'false'
+
+      # stagelibs.classpath.validation.terminate=true
+      #   By default the validation result is only logged. Uncomment to prevent SDC to start if classpath of any stage
+      #   library is not considered valid.
+      #SDC_CONF_STAGELIBS_CLASSPATH_VALIDATION_TERMINATE: 'true'
+
+
+
+      # config.includes=dpm.properties,vault.properties,credential-stores.properties
+      #   Additional Configuration files to include in to the configuration. Value of this property is the name of the
+      #   configuration file separated by commas.      
+      #SDC_CONF_CONFIG_INCLUDES: 'dpm.properties,vault.properties,credential-stores.properties'
+
+      # Record Sampling configurations indicate the size of the subset (sample set) that must be chosen from a
+      # population (of records). Default configuration values indicate the sampler to select 1 out of 10000 records.
+      #
+      # For better performance simplify the fraction ( sample.size / population.size )
+      # i.e., specify ( 1 / 40 ) instead of ( 250 / 10000 ).
+
+      # sdc.record.sampling.sample.size=1
+      #SDC_CONF_SDC_RECORD_SAMPLING_SAMPLE_SIZE: 1
+      
+      # sdc.record.sampling.population.size=10000
+      #SDC_CONF_SDC_RECORD_SAMPLING_POPULATION_SIZE: 10000
+
+
+
+      # store.pipeline.state.cache.maximum.size=100
+      #   Pipeline State are cached for faster access. Specifies the maximum number of pipeline state entries the cache
+      #   may contain.
+      #SDC_CONF_STORE_PIPELINE_STATE_CACHE_MAXIMUM_SIZE: 100
+
+      # store.pipeline.state.cache.expire.after.access=10
+      #   Specifies that each pipeline state entry should be automatically removed from the cache once a fixed duration
+      #   has elapsed after the entry's creation, the most recent replacement of its value, or its last access.
+      #   In minutes.
+      #SDC_CONF_STORE_PIPELINE_STATE_CACHE_EXPIRE_AFTER_ACCESS: 10
