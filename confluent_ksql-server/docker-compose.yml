@@ -1,0 +1,265 @@
+version: '3'
+services:
+  ksql-server:
+    image: confluentinc/cp-ksql-server:5.3.0-1
+    container_name: ksql-server
+    restart: unless-stopped
+    network_mode: bridge
+    ports:
+      - 8088:8088/tcp
+    environment:
+      ########## Server Runtime Environment Variables ##########
+
+      # When KSQL Server starts, it checks for shell environment variables that control the host Java Virtual Machine
+      # (JVM). Set the following environment variables to control options like heap size and Log4j configuration. These
+      # settings are applied by the ksql-run-class shell script when KSQL Server starts.
+
+      # KSQL_CLASSPATH
+      #   Path to the Java deployment of KSQL Server and related Java classes.
+      #     export CLASSPATH=/usr/share/java/my-base/*:/usr/share/java/my-ksql-server/*:/opt/my-company/lib/ksql/*:$CLASSPATH
+      #     export KSQL_CLASSPATH="${CLASSPATH}"
+
+      # KSQL_LOG4J_OPTS
+      #   Specifies KSQL Server logging options by using the Log4j configuration settings.
+      #     export KSQL_LOG4J_OPTS="-Dlog4j.configuration=file:$KSQL_CONFIG_DIR/log4j-rolling.properties"
+
+      # KSQL_JMX_OPTS
+      #   Specifies KSQL metrics options by using Java Management Extensions (JMX).
+      #     export KSQL_JMX_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
+
+      # KSQL_HEAP_OPTS
+      #   Specifies the initial size and maximum size of the JVM heap for the KSQL Server process.
+      #     export KSQL_HEAP_OPTS="-Xms15G -Xmx15G"
+
+      # KSQL_JVM_PERFORMANCE_OPTS
+      #   Specifies performance tuning options for the JVM that runs KSQL Server.
+      #     export KSQL_JVM_PERFORMANCE_OPTS="-server -XX:+UseConcMarkSweepGC -XX:+CMSClassUnload ingEnabled -XX:+CMSScavengeBeforeRemark -XX:+ExplicitGCInvokesConcurrent -XX:New Ratio=1 -Djava.awt.headless=true"
+
+      # JMX_PORT
+      #   Specifies the port that JMX uses to report metrics.
+      #     export JMX_PORT=1099
+
+      # JAVA_HOME
+      #   Specifies the location of the java executable file.
+      #     export JAVA_HOME=<jdk-install-directory>
+      
+
+      ########## Server ##########
+
+      # bootstrap.servers
+      #   A host:port pair for establishing the initial connection to the Kafka cluster. Multiple bootstrap servers can
+      #   be used in the form host1:port1,host2:port2,host3:port3...
+      KSQL_BOOTSTRAP_SERVERS: '192.0.2.1:9092,192.0.2.2:9092,192.0.2.3:9092'
+      
+      # KSQL_OPTS
+      #   You can override KSQL server configuration parameters by using the KSQL_OPTS environment variable.
+      #KSQL_OPTS: '-Dksql.service.id=confluent_test_3_  -Dksql.queries.file=/path/in/container/queries.sql'
+
+      # The default number of replicas for the topics created by KSQL. Recommended for production: 3
+      #KSQL_KSQL_SINK_REPLICAS: 1
+
+      # The protocol that your Kafka cluster uses for security.
+      #KSQL_SECURITY_PROTOCOL: 'SASL_SSL'
+      
+      # The SASL mechanism that your Kafka cluster uses for security.
+      #KSQL_SASL_MECHANISM: 'PLAIN'
+      
+      # The Java Authentication and Authorization Service (JAAS) configuration.
+      #KSQL_SASL_JAAS_CONFIG: 'org.apache.kafka.common.security.plain.PlainLoginModule required username=\"<username>\" password=\"<strong-password>\";'
+
+      # These configurations control the general behavior of the KSQL server. These configurations can only be
+      # specified via the ksql-server.properties file.
+
+      # listeners
+      #   The listeners setting controls the REST API endpoint for the KSQL server. For more info, see KSQL REST API
+      #   Reference. The default hostname is 0.0.0.0 which binds to all interfaces. Update this to a specific interface
+      #   to bind only to a single interface. For example:
+      KSQL_LISTENERS: 'http://0.0.0.0:8088'
+
+      # ksql.query.persistent.active.limit
+      #   The maximum number of persistent queries that may be running at any given time. Applies to interactive mode
+      #   only. Once the limit is reached, commands that try to start additional persistent queries will be rejected.
+      #   Users may terminate existing queries before attempting to start new ones to avoid hitting the limit. The
+      #   default is no limit.
+      #
+      #   When setting up KSQL servers, it may be desirable to configure this limit to prevent users from overloading
+      #   the server with too many queries, since throughput suffers as more queries are run simultaneously, and also
+      #   because there is some small CPU overhead associated with starting each new query. See KSQL Sizing
+      #   Recommendations for more details.
+      #KSQL_KSQL_QUERY_PERSISTENT_ACTIVE_LIMIT: 
+
+      # ksql.queries.file
+      #   A file that specifies a predefined set of queries for the KSQL and KSQL server. For an example, see
+      #   Non-interactive (Headless) KSQL Usage.
+      #KSQL_KSQL_QUERIES_FILE: ''
+
+
+      ########## Streams ##########
+
+      # These configurations control how Kafka Streams executes queries. These configurations can be specified via the
+      # ksql-server.properties file or via SET in a KSQL CLI. These can be provided with the optional ksql.streams.
+      # prefix.
+      #
+      # IMPORTANT: Although you can use either prefixed (ksql.streams.) or un-prefixed settings, it is recommended that
+      # you use prefixed settings.
+
+      # ksql.streams.producer.delivery.timeout.ms
+      #   Set the batch expiry to Integer.MAX_VALUE to ensure that queries will not terminate if the underlying Kafka
+      #   cluster is unavailable for a period of time.
+      #KSQL_KSQL_STREAMS_PRODUCER_DELIVERY_TIMEOUT_MS: 2147483647
+
+      # ksql.streams.producer.max.block.ms
+      #   Set the maximum allowable time for the producer to block to Long.MAX_VALUE. This allows KSQL to pause
+      #   processing if the underlying Kafka cluster is unavailable.
+      #KSQL_KSQL_STREAMS_PRODUCER_MAX_BLOCK_MS: 9223372036854775807
+
+      # ksql.streams.replication.factor
+      # For better fault tolerance and durability, set the replication factor for
+      # the internal topics that Kafka Streams creates for some queries.
+      # Note: the value 3 requires at least 3 brokers in your Kafka cluster.
+      #KSQL_KSQL_STREAMS_REPLICATION_FACTOR: 3
+
+      # ksql.streams.state.dir
+      # Set the storage directory for stateful operations like aggregations and
+      # joins to be at a durable location. By default, they are stored in /tmp.
+      #KSQL_KSQL_STREAMS_STATE_DIR: '/some/non-temporary-storage-path/'
+
+      # ksql.streams.num.standby.replicas
+      # Bump the number of replicas for state storage for stateful operations
+      # like aggregations and joins. By having two replicas (one main and one
+      # standby) recovery from node failures is quicker since the state doesn't
+      # have to be rebuilt from scratch.
+      #KSQL_KSQL_STREAMS_NUM_STANDBY_REPLICAS: 1
+
+      # ksql.streams.auto.offset.reset
+      #   Determines what to do when there is no initial offset in Apache Kafka® or if the current offset does not
+      #   exist on the server. Options: latest, earliest
+      #KSQL_KSQL_STREAMS_AUTO_OFFSET_RESET: latest
+
+      # ksql.streams.bootstrap.servers
+      #   A list of host and port pairs that is used for establishing the initial connection to the Kafka cluster. This
+      #   list should be in the form host1:port1,host2:port2,...
+      #KSQL_KSQL_STREAMS_BOOTSTRAP_SERVERS: '192.168.9.11:9092,192.168.9.12:9092,192.168.9.13:9092'
+
+      # ksql.streams.commit.interval.ms
+      #   The frequency to save the position of the processor.
+      #KSQL_KSQL_STREAMS_COMMIT_INTERVAL_MS: 2000
+
+      # ksql.streams.cache.max.bytes.buffering
+      #   The maximum number of memory bytes to be used for buffering across all threads.
+      #KSQL_KSQL_STREAMS_CACHE_MAX_BYTES_BUFFERING: 10000000
+
+      # ksql.streams.num.stream.threads
+      #   This number of stream threads in an instance of the Kafka Streams application. The stream processing code runs
+      #   in these threads. For more information about Kafka Streams threading model, see Threading Model.
+      #
+      #   The corresponding environment variable in the KSQL Server image is KSQL_KSQL_STREAMS_NUM_STREAM_THREADS.
+
+      # ksql.output.topic.name.prefix
+      #   The default prefix for automatically created topic names. Unless a user defines an explicit topic name in a
+      #   KSQL statement, KSQL prepends the value of ksql.output.topic.name.prefix to the names of automatically
+      #   created output topics. For example, you might use "ksql-interactive-" to name output topics in a KSQL Server
+      #   cluster that's deployed in interactive mode. For more information, see Configuring Security for KSQL.
+      #KSQL_KSQL_OUTPUT_TOPIC_NAME_PREFIX: ''
+
+
+      ########## Query ##########
+
+      # These configurations control how KSQL executes queries. These configurations can be specified via the
+      # ksql-server.properties file or via SET in a KSQL CLI. For example, ksql.service.id and ksql.persistent.prefix.
+
+      # ksql.fail.on.deserialization.error
+      #   Indicates whether to fail if corrupt messages are read. KSQL decodes messages at runtime when reading from a
+      #   Kafka topic. The decoding that KSQL uses depends on what's defined in STREAM's or TABLE's data definition as
+      #   the data format for the topic. If a message in the topic can't be decoded according to that data format, KSQL
+      #   considers this message to be corrupt. For example, a message is corrupt if KSQL expects message values to be
+      #   in JSON format, but they are in DELIMITED format.
+      #KSQL_KSQL_FAIL_ON_DESERIALIZATION_ERROR: 'false'
+
+      # ksql.fail.on.production.error
+      #   Indicates whether to fail if KSQL fails to publish a record to an output topic due to a Kafka producer
+      #   exception. The default value in KSQL is true, which means if a producer error occurs, then the Kafka Streams
+      #   thread that encountered the error will shut down. To log the error message to the KSQL Processing Log and
+      #   have KSQL continue processing as normal, set to false.
+      #KSQL_KSQL_FAIL_ON_PRODUCTION_ERROR: 'true'
+
+      # ksql.schema.registry.url
+      #   The Schema Registry URL path to which KSQL should connect.
+      KSQL_KSQL_SCHEMA_REGISTRY_URL: 'http://192.0.2.11:8081'
+
+      # ksql.service.id
+      #   The service ID of the KSQL server. This is used to define the KSQL cluster membership of a KSQL server
+      #   instance. If multiple KSQL servers connect to the same Kafka cluster (i.e. the same bootstrap.servers) and
+      #   have the same ksql.service.id they will form a KSQL cluster and share the workload.
+      #
+      #   By default, the service ID of KSQL servers is default_. The service ID is also used as the prefix for the
+      #   internal topics created by KSQL. Using the default value ksql.service.id, the KSQL internal topics will be
+      #   prefixed as _confluent-ksql-default_ (e.g. _command_topic becomes _confluent-ksql-default__command_topic).
+      #
+      #   By convention, the ksql.service.id property should end with a separator character of some form, for example a
+      #   dash or underscore, as this makes the internal topic names easier to read.
+      #KSQL_KSQL_SERVICE_ID: 'default_'
+
+      # ksql.internal.topic.replicas
+      #   The number of replicas for the internal topics created by KSQL Server. The default is 1. This configuration
+      #   parameter works in KSQL 5.3 and later. Replicas for the record processing log topic should be configured
+      #   separately. Recommended for production: 3
+      #KSQL_KSQL_INTERNAL_TOPIC_REPLICAS: 1
+
+      # ksql.functions.substring.legacy.args
+      #   Controls the semantics of the SUBSTRING UDF. Refer to the SUBSTRING documentation in the function guide for
+      #   details. When upgrading headless mode KSQL applications from versions 5.0.x or earlier without updating your
+      #   queries that use SUBSTRING to match the new 5.1 behavior, you must set this config to true to enforce the
+      #   previous SUBSTRING behavior. If possible, however, we recommend that you update your queries accordingly
+      #   instead of enabling this configuration setting.
+      #KSQL_KSQL_FUNCTIONS_SUBSTRING_LEGACY_ARGS: 'false'
+
+
+      ########## Processing Log ##########
+
+      # The following configuration settings control the behavior of the KSQL processing log.
+
+      # ksql.logging.processing.topic.auto.create
+      #   Toggles automatic processing log topic creation. If set to true, then KSQL will automatically try to create a
+      #   processing log topic at startup. The name of the topic is the value of the ksql.logging.processing.topic.name
+      #   property. The number of partitions is taken from the ksql.logging.processing.topic.partitions property, and
+      #   the replication factor is taken from the ksql.logging.processing.topic.replication.factor property.
+      #KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: 'false'
+
+      # ksql.logging.processing.topic.name
+      #   If automatic processing log topic creation is enabled, KSQL sets the name of the topic to the value of this
+      #   property. If automatic processing log stream creation is enabled, KSQL uses this topic to back the stream. By
+      #   default, this property has the value <service id>ksql_processing_log, where <service id> is the value of the
+      #   ksql.service.id property.
+      #KSQL_KSQL_LOGGING_PROCESSING_TOPIC_NAME: ''
+
+      # ksql.logging.processing.topic.partitions
+      #   If automatic processing log topic creation is enabled, KSQL creates the topic with number of partitions set
+      #   to the value of this property. By default, this property has the value 1.
+      #KSQL_KSQL_LOGGING_PROCESSING_TOPIC_PARTITIONS: 1
+
+      # ksql.logging.processing.topic.replication.factor
+      #   If automatic processing log topic creation is enabled, KSQL creates the topic with number of replicas set to
+      #   the value of this property. By default, this property has the value 1.
+      #KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: 1
+
+      # ksql.logging.processing.stream.auto.create
+      #   Toggles automatic processing log stream creation. If set to true, and KSQL is running in interactive mode on
+      #   a new cluster, KSQL automatically creates a processing log stream when it starts up. The name for the stream
+      #   is the value of the ksql.logging.processing.stream.name property. The stream is created over the topic set in
+      #   the ksql.logging.processing.topic.name property. By default, this property has the value false.
+      #KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: 'false'
+
+      # ksql.logging.processing.stream.name
+      #   If automatic processing log stream creation is enabled, KSQL sets the name of the stream to the value of this
+      #   property. By default, this property has the value KSQL_PROCESSING_LOG.
+      #KSQL_KSQL_LOGGING_PROCESSING_STREAM_NAME: 'KSQL_PROCESSING_LOG'
+
+      # ksql.logging.processing.rows.include
+      #   Toggles whether or not the processing log should include rows in log messages. By default, this property has
+      #   the value false.
+      #KSQL_KSQL_LOGGING_PROCESSING_ROWS_INCLUDE: 'false'
+
+      ########## Confluent Monitoring Interceptors ##########
+      #KSQL_PRODUCER_INTERCEPTOR_CLASSES: 'io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor'
+      #KSQL_CONSUMER_INTERCEPTOR_CLASSES: 'io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor'

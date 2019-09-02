@@ -1,0 +1,393 @@
+version: '3'
+services:
+  kafka-rest:
+    image: confluentinc/cp-kafka-rest:5.3.0-1
+    container_name: kafka-rest
+    restart: unless-stopped
+    network_mode: bridge
+    ports:
+      - 8082:8082/tcp
+    environment:
+      ########## General ##########
+
+      # host.name
+      #   The host name used to generate absolute URLs in responses. If empty, the default canonical hostname is used.
+      #KAFKA_REST_HOST_NAME: ''
+
+      # id
+      #   Unique ID for the Confluent REST Proxy server instance. This is used in generating unique IDs for consumers
+      #   that do not specify their ID. The ID is empty by default, which makes a single server setup easier to get up
+      #   and running, but is not safe for multi-server deployments where automatic consumer IDs are used.
+      #KAFKA_REST_ID: ''
+
+      # bootstrap.servers
+      #   A list of Kafka brokers to connect to. For example, PLAINTEXT://hostname:9092,SSL://hostname2:9092. This
+      #   configuration is particularly important when Kafka security is enabled, because Kafka may expose multiple
+      #   endpoints that all will be stored in ZooKeeper, but REST Proxy may need to be configured with just one of
+      #   those endpoints. The client will make use of all servers irrespective of which servers are specified here for
+      #   bootstrapping—this list only impacts the initial hosts used to discover the full set of servers. Since these
+      #   servers are just used for the initial connection to discover the full cluster membership (which may change
+      #   dynamically), this list need not contain the full set of servers (you may want more than one, though, in case
+      #   a server is down).
+      KAFKA_REST_BOOTSTRAP_SERVERS: 'PLAINTEXT://192.0.2.1:9092,PLAINTEXT://192.0.2.2:9092,PLAINTEXT://192.0.2.3:9092'
+
+      # listeners
+      #   Comma-separated list of listeners that listen for API requests over either HTTP or HTTPS. If a listener uses
+      #   HTTPS, the appropriate SSL configuration parameters need to be set as well.
+      KAFKA_REST_LISTENERS: 'http://0.0.0.0:8082'
+
+      # schema.registry.url
+      #   The base URL for Schema Registry that should be used by the Avro serializer.
+      KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://192.0.2.11:8081'
+
+      # zookeeper.connect
+      #   Specifies the ZooKeeper connection string in the form hostname:port where host and port are the host and port
+      #   of a ZooKeeper server. To allow connecting through other ZooKeeper nodes when that ZooKeeper machine is down
+      #   you can also specify multiple hosts in the form hostname1:port1,hostname2:port2,hostname3:port3.
+      #
+      #   The server may also have a ZooKeeper chroot path as part of it's ZooKeeper connection string which puts its
+      #   data under some path in the global ZooKeeper namespace. If so the consumer should use the same chroot path in
+      #   its connection string. For example to give a chroot path of /chroot/path you would give the connection string
+      #   as hostname1:port1,hostname2:port2,hostname3:port3/chroot/path.
+      KAFKA_REST_ZOOKEEPER_CONNECT: '192.0.2.21:2181,192.0.2.22:2181,192.0.2.23:2181'
+
+      # consumer.request.max.bytes
+      #   Maximum number of bytes in unencoded message keys and values returned by a single request. This can be used
+      #   by administrators to limit the memory used by a single consumer and to control the memory usage required to
+      #   decode responses on clients that cannot perform a streaming decode. Note that the actual payload will be
+      #   larger due to overhead from base64 encoding the response data and from JSON encoding the entire response.
+      #KAFKA_REST_CONSUMER_REQUEST_MAX_BYTES: 67108864
+
+      # consumer.threads
+      #   The maximum number of threads to run consumer requests on. Note that this must be greater than the maximum
+      #   number of consumers in a single consumer group. The sentinel value of -1 allows the number of threads to grow
+      #   as needed to fulfill active consumer requests. Inactive threads will ultimately be stopped and cleaned up.
+      #KAFKA_REST_CONSUMER_THREADS: 50
+      
+      # consumer.request.timeout.ms
+      #   The maximum total time to wait for messages for a request if the maximum number of messages has not yet been
+      #   reached.
+      #KAFKA_REST_CONSUMER_REQUEST_TIMEOUT_MS: 1000
+
+      # simpleconsumer.pool.size.max
+      #   Maximum number of SimpleConsumers that can be instantiated per broker. If 0, then the pool size is not
+      #   limited.
+      #KAFKA_REST_SIMPLECONSUMER_POOL_SIZE_MAX: 25
+
+      # access.control.allow.methods
+      #   Set value to Jetty Access-Control-Allow-Origin header for specified methods.
+      #KAFKA_REST_ACCESS_CONTROL_ALLOW_METHODS: ''
+
+      # access.control.allow.origin
+      #   Set value for Jetty Access-Control-Allow-Origin header.
+      #KAFKA_REST_ACCESS_CONTROL_ALLOW_ORIGIN: ''
+
+      # consumer.instance.timeout.ms
+      #   Amount of idle time before a consumer instance is automatically destroyed.
+      #KAFKA_REST_CONSUMER_INSTANCE_TIMEOUT_MS: 300000
+
+      # consumer.iterator.backoff.ms
+      #   Amount of time to backoff when an iterator runs out of data. If a consumer has a dedicated worker thread,
+      #   this is effectively the maximum error for the entire request timeout. It should be small enough to closely
+      #   target the timeout, but large enough to avoid busy waiting.
+      #KAFKA_REST_CONSUMER_ITERATOR_BACKOFF_MS: 50
+
+      # fetch.min.bytes
+      #   Minimum number of bytes in message keys and values returned by a single request before the timeout of
+      #   consumer.request.timeout.ms passes. The special sentinel value of -1 disables this functionality.
+      #KAFKA_REST_FETCH_MIN_BYTES: -1
+
+      # consumer.iterator.timeout.ms
+      #   Timeout for blocking consumer iterator operations. This should be set to a small enough value that it is
+      #   possible to effectively peek() on the iterator.
+      #KAFKA_REST_CONSUMER_ITERATOR_TIMEOUT_MS: 1
+
+      # debug
+      #   Boolean indicating whether extra debugging information is generated in some error response entities.
+      #KAFKA_REST_DEBUG: 'false'
+
+      # metric.reporters
+      #   A list of classes to use as metrics reporters. Implementing the <code>MetricReporter</code> interface allows
+      #   plugging in classes that will be notified of new metric creation. The JmxReporter is always included to
+      #   register JMX statistics.
+      #KAFKA_REST_METRIC_REPORTERS: ''
+
+      # metrics.jmx.prefix
+      #   Prefix to apply to metric names for the default JMX reporter.
+      #KAFKA_REST_METRICS_JMX_PREFIX: 'kafka.rest'
+
+      # metrics.num.samples
+      #   The number of samples maintained to compute metrics.
+      #KAFKA_REST_METRICS_NUM_SAMPLES: 2
+
+      # metrics.sample.window.ms
+      #   The metrics system maintains a configurable number of samples over a fixed window size. This configuration
+      #   controls the size of the window. For example we might maintain two samples each measured over a 30 second
+      #   period. When a window expires we erase and overwrite the oldest window.
+      #KAFKA_REST_METRICS_SAMPLE_WINDOW_MS: 30000
+
+      # producer.threads
+      #   Number of threads to run produce requests on.
+      #KAFKA_REST_PRODUCER_THREADS: 5
+
+      # request.logger.name
+      #   Name of the SLF4J logger to write the NCSA Common Log Format request log.
+      #KAFKA_REST_REQUEST_LOGGER_NAME: 'io.confluent.rest-utils.requests'
+
+      # response.mediatype.default
+      #   The default response media type that should be used if no specify types are requested in an Accept header.
+      #KAFKA_REST_RESPONSE_MEDIATYPE_DEFAULT: 'application/vnd.kafka.v1+json'
+
+      # response.mediatype.preferred
+      #   An ordered list of the server's preferred media types used for responses, from most preferred to least.
+      #KAFKA_REST_RESPONSE_MEDIATYPE_PREFFERED: 'application/vnd.kafka.v1+json, application/vnd.kafka+json, application/json'
+
+      # shutdown.graceful.ms
+      #   Amount of time to wait after a shutdown request for outstanding requests to complete.
+      #KAFKA_REST_SHUTDOWN_GRACEFUL_MS: 1000
+
+      # simpleconsumer.pool.timeout.ms
+      #   Amount of time to wait for an available SimpleConsumer from the pool before failing. Use 0 for no timeout.
+      #KAFKA_REST_SIMPLECONSUMER_POOL_TIMEOUT_MS: 1000
+
+      # kafka.rest.resource.extension.class
+      #   A list of classes to use as RestResourceExtension. Implementing the interface
+      #   <code>RestResourceExtension</code> allows you to inject user defined resources like filters to REST Proxy.
+      #   Typically used to add custom capability like logging, security, etc.
+      #KAFKA_REST_KAFKA_REST_RESOURCE_EXTENSION_CLASS: ''
+
+
+      ########## Security ##########
+      
+      # REST Proxy supports SSL for securing communication between REST clients and the REST Proxy (HTTPS), and both
+      # SSL and SASL to secure communication between REST Proxy and Apache Kafka.
+
+      ### HTTPS ###
+      
+      # ssl.keystore.location
+      #   Used for HTTPS. Location of the keystore file to use for SSL. IMPORTANT: Jetty requires that the key's CN,
+      #   stored in the keystore, must match the FQDN.
+      #KAFKA_REST_SSL_KEYSTORE_LOCATION: ''
+
+      # ssl.keystore.password
+      #   Used for HTTPS. The store password for the keystore file.
+      #KAFKA_REST_SSL_KEYSTORE_PASSWORD: ''
+
+      # ssl.key.password
+      #   Used for HTTPS. The password of the private key in the keystore file.
+      #KAFKA_REST_SSL_KEY_PASSWORD: ''
+
+      # ssl.truststore.location
+      #   Used for HTTPS. Location of the trust store. Required only to authenticate HTTPS clients.
+      #KAFKA_REST_SSL_TRUSTSTORE_LOCATION: ''
+
+      # ssl.truststore.password
+      #   Used for HTTPS. The store password for the trust store file.
+      #KAFKA_REST_SSL_TRUSTSTORE_PASSWORD: ''
+
+      # ssl.keystore.type
+      #   Used for HTTPS. The type of keystore file.
+      #KAFKA_REST_SSL_KEYSTORE_TYPE: JKS
+
+      # ssl.truststore.type
+      #   Used for HTTPS. The type of trust store file.
+      #KAFKA_REST_SSL_TRUSTSTORE_TYPE: JKS
+      
+      # ssl.protocol
+      #   Used for HTTPS. The SSL protocol used to generate the SslContextFactory.
+      #KAFKA_REST_SSL_PROTOCOL: TLS
+
+      # ssl.provider
+      #   Used for HTTPS. The SSL security provider name. Leave blank to use Jetty's default.
+      #KAFKA_REST_SSL_PROVIDER: ''
+
+      # ssl.client.auth
+      #   Used for HTTPS. Whether or not to require the HTTPS client to authenticate via the server's trust store.
+      #KAFKA_REST_SSL_CLIENT_AUTH: 'false'
+
+      # ssl.enabled.protocols
+      #   Used for HTTPS. The list of protocols enabled for SSL connections. Comma-separated list. Leave blank to use
+      #   Jetty's defaults.
+      #KAFKA_REST_SSL_ENABLED_PROTOCOLS: ''
+
+      # keymanager.algorithm
+      #   Used for HTTPS. The algorithm used by the key manager factory for SSL connections. Leave blank to use Jetty's
+      #   default.
+      #KAFKA_REST_SSL_KEYMANAGER_ALGORITHM: ''
+
+      # trustmanager.algorithm
+      #   Used for HTTPS. The algorithm used by the trust manager factory for SSL connections. Leave blank to use
+      #   Jetty's default.
+      #KAFKA_REST_SSL_TRUSTMANAGER_ALGORITHM: ''
+
+      # cipher.suites
+      #   Used for HTTPS. A list of SSL cipher suites. Comma-separated list. Leave blank to use Jetty's defaults.
+      #KAFKA_REST_SSL_CIPHER_SUITES: ''
+
+      # endpoint.identification.algorithm
+      #   Used for HTTPS. The endpoint identification algorithm to validate the server hostname using the server
+      #   certificate. Leave blank to use Jetty's default.
+      #KAFKA_REST_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
+
+      
+      ### Communications between REST Proxy and Apache Kafka Brokers ###
+      
+      # client.security.protocol
+      #   Protocol used to communicate with brokers. Valid values are: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL.
+      #KAFKA_REST_CLIENT_SECURITY_PROTOCOL: PLAINTEXT
+
+      
+      ### SSL Encryption ###
+
+      # Note that all the SSL configurations (for REST Proxy to Broker communication) are prefixed with "client". If
+      # you want the configuration to apply just to consumers or just to producers, you can replace the prefix with
+      # "consumer" or "producer" respectively.
+      #
+      # In addition to these configurations, make sure bootstrap.servers configuration is set with SSL://host:port
+      # end-points, or you'll accidentally open an SSL connection to a non-SSL port.
+
+      # client.ssl.key.password
+      #   The password of the private key in the key store file. This is optional for client.
+      #KAFKA_REST_CLIENT_SSL_KEY_PASSWORD: null
+
+      # client.ssl.keystore.location
+      #   The location of the key store file. This is optional for client and can be used for two-way authentication
+      #   for client.
+      #KAFKA_REST_CLIENT_SSL_KEYSTORE_LOCATION: null
+
+      # client.ssl.keystore.password
+      #   The store password for the key store file. This is optional for client and only needed if
+      #   ssl.keystore.location is configured.
+      #KAFKA_REST_CLIENT_SSL_KEYSTORE_PASSWORD: null
+
+      # client.ssl.truststore.location
+      #   The location of the trust store file.
+      #KAFKA_REST_CLIENT_SSL_TRUSTSTORE_LOCATION: null
+
+      # client.ssl.truststore.password
+      #   The password for the trust store file.
+      #KAFKA_REST_CLIENT_SSL_TRUSTSTORE_PASSWORD: null
+
+      # client.ssl.enabled.protocols
+      #   The list of protocols enabled for SSL connections.
+      #KAFKA_REST_CLIENT_SSL_ENABLED_PROTOCOLS: 'TLSv1.2,TLSv1.1,TLSv1'
+
+      # client.ssl.keystore.type
+      #   The file format of the key store file. This is optional for client.
+      #KAFKA_REST_CLIENT_SSL_KEYSTORE_TYPE: JKS
+
+      # client.ssl.protocol
+      #   The SSL protocol used to generate the SSLContext. Default setting is TLS, which is fine for most cases.
+      #   Allowed values in recent JVMs are TLS, TLSv1.1 and TLSv1.2. SSL, SSLv2 and SSLv3 may be supported in older
+      #   JVMs, but their usage is discouraged due to known security vulnerabilities.
+      #KAFKA_REST_CLIENT_SSL_PROTOCOL: TLS
+
+      # client.ssl.provider
+      #   The name of the security provider used for SSL connections. Default value is the default security provider of
+      #   the JVM.
+      #KAFKA_REST_CLIENT_SSL_PROVIDER: null
+
+      # client.ssl.truststore.type
+      #   The file format of the trust store file.
+      #KAFKA_REST_CLIENT_SSL_TRUSTSTORE_TYPE: JKS
+
+      # client.ssl.cipher.suites
+      #   A list of cipher suites. This is a named combination of authentication, encryption, MAC and key exchange
+      #   algorithm used to negotiate the security settings for a network connection using TLS or SSL network protocol.
+      #   By default all the available cipher suites are supported.
+      #KAFKA_REST_CLIENT_SSL_CIPHER_SUITES: null
+
+      # client.ssl.endpoint.identification.algorithm
+      #   The endpoint identification algorithm to validate server hostname using server certificate.
+      #KAFKA_REST_CLIENT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: null
+
+      # client.ssl.keymanager.algorithm
+      #   The algorithm used by key manager factory for SSL connections. Default value is the key manager factory
+      #   algorithm configured for the Java Virtual Machine.
+      #KAFKA_REST_CLIENT_SSL_KEYMANAGER_ALGORITHM: SunX509
+
+      # client.ssl.secure.random.implementation
+      #   The SecureRandom PRNG implementation to use for SSL cryptography operations.
+      #KAFKA_REST_CLIENT_SSL_SECURE_RANDOM_ALGORITHM: null
+
+      # client.ssl.trustmanager.algorithm
+      #   The algorithm used by trust manager factory for SSL connections. Default value is the trust manager factory
+      #   algorithm configured for the Java Virtual Machine.
+      #KAFKA_REST_TRUSTMANAGER_ALGORITHM: PKIX
+
+      
+      ### SASL Authentication between REST Proxy and Apache Kafka Brokers ###
+      
+      # Note that all the SASL configurations (for REST Proxy to Broker communication) are prefixed with "client". If
+      # you want the configuration to apply just to consumers or just to producers, you can replace the prefix with
+      # "consumer" or "producer" respectively.
+      #
+      # In addition to these configurations:
+      # - Make sure bootstrap.servers configuration is set with SASL_PLAINTEXT://host:port (or SASL_SSL://host:port)
+      #   end-points, or you'll accidentally open an SASL connection to a non-SASL port.
+      #
+      # - Pass the name of the JAAS file and the name of Kerberos config file via environment variables to the REST
+      #   Proxy. For example:
+      #
+      #   $ export KAFKAREST_OPTS="-Djava.security.auth.login.config=/mnt/security/jaas.conf -Djava.security.krb5.conf=/mnt/security/krb5.conf";
+      #   /opt/kafka-rest/bin/kafka-rest-start /mnt/rest.properties 1>> /mnt/rest.log 2>> /mnt/rest.log &
+      #
+      # - If you need to access Schema Registry via https protocol, one would need additional javax.net.ssl.trustStore
+      #   and javax.net.ssl.trustStorePassword parameters, as shown below:
+      #
+      #   $ export KAFKAREST_OPTS='-Djava.security.auth.login.config=/mnt/security/jaas.conf -Djava.security.krb5.conf=/mnt/security/krb5.conf -Djavax.net.ssl.trustStore=/mnt/security/test.truststore.jks -Djavax.net.ssl.trustStorePassword=test-ts-passwd';
+      #   /opt/kafka-rest/bin/kafka-rest-start /mnt/rest.properties 1>> /mnt/rest.log 2>> /mnt/rest.log &
+      #
+      # For more details about krb5.conf file please see JDK’s Kerberos Requirements.
+      #
+      # Keep in mind that authenticated and encrypted connection to Apache Kafka will only work when Kafka brokers (and
+      # Schema Registry, if used) are running with appropriate security configuration. Check out the documentation on
+      # Kafka Security and Schema Registry.
+
+      # client.sasl.jaas.config
+      #   JAAS login context parameters for SASL connections in the format used by JAAS configuration files. JAAS
+      #   configuration file format is described in Oracle's documentation. The format for the value is: ' (=)*;'
+      #KAFKA_REST_CLIENT_SASL_JAAS_CONFIG: null
+
+      # client.sasl.kerberos.service.name
+      #   The Kerberos principal name that Kafka runs as. This can be defined either in Kafka's JAAS config or in
+      #   Kafka's config.
+      #KAFKA_REST_CLIENT_KERBEROS_SERVICE_NAME: null
+
+      # client.sasl.mechanism
+      #   SASL mechanism used for client connections. This may be any mechanism for which a security provider is
+      #   available. GSSAPI is the default mechanism.
+      #KAFKA_REST_CLIENT_SASL_MECHANISM: GSSAPI
+
+      # client.sasl.kerberos.kinit.cmd
+      #   Kerberos kinit command path.
+      #KAFKA_REST_CLIENT_SASL_KERBEROS_KINIT_CMD: '/usr/bin/kinit'
+
+      # client.sasl.kerberos.min.time.before.relogin
+      #   Login thread sleep time between refresh attempts.
+      #KAFKA_REST_CLIENT_SASL_KERBEROS_MIN_TIME_BEFORE_RELOGIN: 60000
+
+      # client.sasl.kerberos.ticket.renew.jitter
+      #   Percentage of random jitter added to the renewal time.
+      #KAFKA_REST_CLIENT_SASL_KERBEROS_TICKET_RENEW_JITTER: 0.05
+
+      # client.sasl.kerberos.ticket.renew.window.factor
+      #   Login thread will sleep until the specified window factor of time from last refresh to ticket's expiry has
+      #   been reached, at which time it will try to renew the ticket.
+      #KAFKA_REST_CLIENT_SASL_KERBEROS_TICKET_RENEW_WINDOW_FACTOR: 0.8
+
+      
+      ########## Interceptor ##########
+      
+      # REST Proxy supports interceptor configurations as part of Java new producer and consumer settings. For example,
+      # to enable Confluent Control Center monitoring interceptors:
+      #   consumer.interceptor.classes=io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor
+      #   producer.interceptor.classes=io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor
+
+      # producer.interceptor.classes
+      #   Producer interceptor classes.
+      #KAFKA_REST_PRODUCER_INTERCEPTOR_CLASSES: ''
+
+      # consumer.interceptor.classes
+      #   Consumer interceptor classes.
+      #KAFKA_REST_CONSUMER_INTERCEPTOR_CLASSES: ''

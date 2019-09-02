@@ -1,0 +1,311 @@
+version: '3'
+services:
+  schema-registry:
+    image: confluentinc/cp-schema-registry:5.3.0-1
+    container_name: schema-registry
+    restart: unless-stopped
+    network_mode: bridge
+    ports:
+      - 8081:8081/tcp
+    environment:
+      # kafkastore.connection.url
+      #   ZooKeeper URL for the Apache Kafka® cluster
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: '192.0.2.21:2181,192.0.2.22:2181,192.0.2.23:2181'
+
+      # kafkastore.bootstrap.servers
+      #   A list of Kafka brokers to connect to. For example, PLAINTEXT://hostname:9092,SSL://hostname2:9092
+      #   The effect of this setting depends on whether you specify kafkastore.connection.url.
+      #
+      #   If kafkastore.connection.url is not specified, the Kafka cluster containing these bootstrap servers is used
+      #   both to coordinate Schema Registry instances (primary election) and to store schema data.
+      #
+      #   If kafkastore.connection.url is specified, this setting is used to control how Schema Registry connects to
+      #   Kafka to store schema data and is particularly important when Kafka security is enabled. When this
+      #   configuration is not specified, Schema Registry's internal Kafka clients will get their Kafka bootstrap
+      #   server list from ZooKeeper (configured with kafkastore.connection.url). In that case, all available
+      #   listeners matching the kafkastore.security.protocol setting is used.
+      #
+      #   By specifying this configuration, you can control which endpoints are used to connect to Kafka. Kafka may
+      #   expose multiple endpoints that all will be stored in ZooKeeper, but Schema Registry may need to be configured
+      #   with just one of those endpoints, for example to control which security protocol it uses.
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'PLAINTEXT://192.0.2.1:9092,PLAINTEXT://192.0.2.2:9092,PLAINTEXT://192.0.2.3:9092'
+
+      # listeners
+      #   Comma-separated list of listeners that listen for API requests over either HTTP or HTTPS. If a listener uses
+      #   HTTPS, the appropriate SSL configuration parameters need to be set as well.
+      #
+      #   Schema Registry identities are stored in ZooKeeper and are made up of a hostname and port. If multiple
+      #   listeners are configured, the first listener's port is used for its identity.
+      SCHEMA_REGISTRY_LISTENERS: 'http://0.0.0.0:8081'
+
+      # avro.compatibility.level
+      #   The Avro compatibility type. Valid values are: none (new schema can be any valid Avro schema), backward (new
+      #   schema can read data produced by latest registered schema), backward_transitive (new schema can read data
+      #   produced by all previously registered schemas), forward (latest registered schema can read data produced by
+      #   the new schema), forward_transitive (all previously registered schemas can read data produced by the new
+      #   schema), full (new schema is backward and forward compatible with latest registered schema), full_transitive
+      #   (new schema is backward and forward compatible with all previously registered schemas)
+      SCHEMA_REGISTRY_AVRO_COMPATIBILITY_LEVEL: 'backward'
+
+      # host.name
+      #   The host name advertised in ZooKeeper. Make sure to set this if running Schema Registry with multiple nodes.
+      SCHEMA_REGISTRY_HOST_NAME: 'localhost'
+
+      # kafkastore.ssl.key.password
+      #   The password of the key contained in the keystore.
+      #SCHEMA_REGISTRY_KAFKASTORE_SSL_KEY_PASSWORD: ''
+
+      # kafkastore.ssl.keystore.location
+      #   The location of the SSL keystore file.
+      #SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_LOCATION: ''
+
+      # kafkastore.ssl.keystore.password
+      #   The password to access the keystore.
+      #SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_PASSWORD: ''
+
+      # kafkastore.ssl.truststore.location
+      #   The location of the SSL trust store file.
+      #SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_LOCATION: ''
+
+      # kafkastore.ssl.truststore.password
+      #   The password to access the trust store.
+      #SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_PASSWORD: ''
+
+      # kafkastore.topic
+      #   The durable single partition topic that acts as the durable log for the data. This topic must be compacted to
+      #   avoid losing data due to retention policy.
+      #SCHEMA_REGISTRY_KAFKASTORE_TOPIC: _schemas
+
+      # kafkastore.topic.replication.factor
+      #   The desired replication factor of the schema topic. The actual replication factor will be the smaller of this
+      #   value and the number of live Kafka brokers.
+      #SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 3
+
+      # response.mediatype.default
+      #   The default response media type that should be used if no specify types are requested in an Accept header.
+      #SCHEMA_REGISTRY_RESPONSE_MEDIATYPE_DEFAULT: 'application/vnd.schemaregistry.v1+json'
+
+      # ssl.keystore.location
+      #   Used for HTTPS. Location of the keystore file to use for SSL.
+      #   IMPORTANT: Jetty requires that the key's CN, stored in the keystore, must match the FQDN.
+      #SCHEMA_REGISTRY_SSL_KEYSTORE_LOCATION: ''
+
+      # ssl.keystore.password
+      #   Used for HTTPS. The store password for the keystore file.
+      #SCHEMA_REGISTRY_SSL_KEYSTORE_PASSWORD: ''
+
+      # ssl.key.password
+      #   Used for HTTPS. The password of the private key in the keystore file.
+      #SCHEMA_REGISTRY_SSL_KEY_PASSWORD: ''
+
+      # ssl.truststore.location
+      #   Used for HTTPS. Location of the trust store. Required only to authenticate HTTPS clients.
+      #SCHEMA_REGISTRY_SSL_TRUSTSTORE_LOCATION: ''
+
+      # ssl.truststore.password
+      #   Used for HTTPS. The store password for the trust store file.
+      #SCHEMA_REGISTRY_SSL_TRUSTSTORE_PASSWORD: ''
+
+      # response.mediatype.preferred
+      #   An ordered list of the server's preferred media types used for responses, from most preferred to least.
+      #SCHEMA_REGISTRY_RESPONSE_MEDIATYPE_PREFERRED: 'application/vnd.schemaregistry.v1+json, application/vnd.schemaregistry+json, application/json'
+
+      # zookeeper.set.acl
+      #   Whether or not to set an ACL in ZooKeeper when znodes are created and ZooKeeper SASL authentication is
+      #   configured.
+      #   IMPORTANT: If set to true, the ZooKeeper SASL principal must be the same as the Kafka brokers.
+      #SCHEMA_REGISTRY_ZOOKEEPER_SET_ACL: 'false'
+
+      # kafkastore.init.timeout.ms
+      #   The timeout for initialization of the Kafka store, including creation of the Kafka topic that stores schema
+      #   data.
+      #SCHEMA_REGISTRY_KAFKASTORE_INIT_TIMEOUT_MS: 60000
+
+      # kafkastore.security.protocol
+      #   The security protocol to use when connecting with Kafka, the underlying persistent storage. Values can be
+      #   PLAINTEXT, SASL_PLAINTEXT, SSL or SASL_SSL.
+      #SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: PLAINTEXT
+
+      # kafkastore.ssl.enabled.protocols
+      #   Protocols enabled for SSL connections.
+      #SCHEMA_REGISTRY_KAFKASTORE_SSL_ENABLED_PROTOCOLS: 'TLSv1.2,TLSv1.1,TLSv1'
+
+      # kafkastore.ssl.keystore.type
+      #   The file format of the keystore.
+      #SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_TYPE: JKS
+
+      # kafkastore.ssl.protocol
+      #   The SSL protocol used.
+      #SCHEMA_REGISTRY_KAFKASTORE_SSL_PROTOCOL: TLS
+
+      # kafkastore.ssl.provider
+      #   The name of the security provider used for SSL.
+      #SCHEMA_REGISTRY_KAFKASTORE_SSL_PROVIDER: ''
+
+      # kafkastore.ssl.truststore.type
+      #   The file format of the trust store.
+      #SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_TYPE: JKS
+
+      # kafkastore.timeout.ms
+      #   The timeout for an operation on the Kafka store
+      #SCHEMA_REGISTRY_KAFKASTORE_TIMEOUT_MS: 500
+
+      # master.eligibility
+      #   If true, this node can participate in primary election. In a multi-colo setup, turn this off for clusters in
+      #   the secondary data center.
+      #SCHEMA_REGISTRY_MASTER_ELIGIBILITY: 'true'
+
+      # kafkastore.sasl.kerberos.service.name
+      #   The Kerberos principal name that the Kafka client runs as. This can be defined either in the JAAS config file
+      #   or here.
+      #SCHEMA_REGISTRY_KAFKASTORE_SASL_KERBEROS_SERVICE_NAME: ''
+
+      # kafkastore.sasl.mechanism
+      #   The SASL mechanism used for Kafka connections. GSSAPI is the default.
+      #SCHEMA_REGISTRY_KAFKASTORE_SASL_MECHANISM: GSSAPI
+
+      # access.control.allow.methods
+      #   Set value to Jetty Access-Control-Allow-Origin header for specified methods
+      #SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: ''
+
+      # ssl.keystore.type
+      #   Used for HTTPS. The type of keystore file.
+      #SCHEMA_REGISTRY_SSL_KEYSTORE_TYPE: JKS
+
+      # ssl.truststore.type
+      #   Used for HTTPS. The type of trust store file.
+      #SCHEMA_REGISTRY_SSL_TRUSTSTORE_TYPE: JKS
+
+      # ssl.protocol
+      #   Used for HTTPS. The SSL protocol used to generate the SslContextFactory.
+      #SCHEMA_REGISTRY_SSL_PROTOCOL: TLS
+
+      # ssl.provider
+      #   Used for HTTPS. The SSL security provider name. Leave blank to use Jetty's default.
+      #SCHEMA_REGISTRY_SSL_PROVIDER: ''
+
+      # ssl.client.auth
+      #   Used for HTTPS. Whether or not to require the HTTPS client to authenticate via the server's trust store.
+      #SCHEMA_REGISTRY_SSL_CLIENT_AUTH: 'false'
+
+      # ssl.enabled.protocols
+      #   Used for HTTPS. The list of protocols enabled for SSL connections. Comma-separated list. Leave blank to use
+      #   Jetty's defaults.
+      #SCHEMA_REGISTRY_SSL_ENABLED_PROTOCOLS: ''
+
+      # access.control.allow.origin
+      #   Set value for Jetty Access-Control-Allow-Origin header
+      #SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: ''
+
+      # debug
+      #   Boolean indicating whether extra debugging information is generated in some error response entities.
+      #SCHEMA_REGISTRY_DEBUG: 'false'
+
+      # kafkastore.ssl.cipher.suites
+      #   A list of cipher suites used for SSL.
+      #SCHEMA_REGISTRY_KAFKASTORE_SSL_CIPHER_SUITES: ''
+
+      # kafkastore.ssl.endpoint.identification.algorithm
+      #   The endpoint identification algorithm to validate the server hostname using the server certificate.
+      #SCHEMA_REGISTRY_KAFKASTORE_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
+
+      # kafkastore.ssl.keymanager.algorithm
+      #   The algorithm used by key manager factory for SSL connections.
+      #SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYMANAGER_ALGORITHM: SunX509
+
+      # kafkastore.ssl.trustmanager.algorithm
+      #   The algorithm used by the trust manager factory for SSL connections.
+      #SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_ALGORITHM: PKIX
+
+      # kafkastore.zk.session.timeout.ms
+      #   ZooKeeper session timeout
+      #SCHEMA_REGISTRY_KAFKASTORE_ZK_SESSION_TIMEOUT_MS: 30000
+
+      # metric.reporters
+      #   A list of classes to use as metrics reporters. Implementing the MetricReporter interface allows plugging in
+      #   classes that will be notified of new metric creation. The JmxReporter is always included to register JMX
+      #   statistics.
+      #SCHEMA_REGISTRY_METRIC_REPORTERS: ''
+
+      # metrics.jmx.prefix
+      #   Prefix to apply to metric names for the default JMX reporter.
+      #SCHEMA_REGISTRY_METRICS_JMX_PREFIX: 'kafka.schema.registry'
+
+      # metrics.num.samples
+      #   The number of samples maintained to compute metrics.
+      #SCHEMA_REGISTRY_METRICS_NUM_SAMPLES: 2
+
+      # metrics.sample.window.ms
+      #   The metrics system maintains a configurable number of samples over a fixed window size. This configuration
+      #   controls the size of the window. For example we might maintain two samples each measured over a 30 second
+      #   period. When a window expires we erase and overwrite the oldest window.
+      #SCHEMA_REGISTRY_METRICS_SAMPLE_WINDOW_MS: 30000
+
+      # request.logger.name
+      #   Name of the SLF4J logger to write the NCSA Common Log Format request log.
+      #SCHEMA_REGISTRY_REQUEST_LOGGER_NAME: 'io.confluent.rest-utils.requests'
+
+      # inter.instance.protocol
+      #   The protocol used while making calls between the instances of Schema Registry. The secondary to primary node
+      #   calls for writes and deletes will use the specified protocol. The default value would be http. When https is
+      #   set, ssl.keystore and ssl.truststore configs are used while making the call. (Use instead of the deprecated
+      #   schema.registry.inter.instance.protocol.)
+      #SCHEMA_REGISTRY_INTER_INSTANCE_PROTOCOL: http
+
+      # resource.extension.class
+      #   Fully qualified class name of a valid implementation of the interface SchemaRegistryResourceExtension. This
+      #   can be used to inject user defined resources like filters. Typically used to add custom capability like
+      #   logging, security, etc. (Use resource.extension.class instead of deprecated
+      #   schema.registry.resource.extension.class.)
+      #SCHEMA_REGISTRY_RESOURCE_EXTENSION_CLASS: ''
+
+      # schema.registry.zk.namespace
+      #   The string that is used as the ZooKeeper namespace for storing Schema Registry metadata. Schema Registry
+      #   instances which are part of the same Schema Registry service should have the same ZooKeeper namespace.
+      #SCHEMA_REGISTRY_SCHEMA_REGISTRY_ZK_NAMESPACE: schema_registry
+
+      # shutdown.graceful.ms
+      #   Amount of time to wait after a shutdown request for outstanding requests to complete.
+      #SCHEMA_REGISTRY_SHUTDOWN_GRACEFUL_MS: 1000
+
+      # ssl.keymanager.algorithm
+      #   Used for HTTPS. The algorithm used by the key manager factory for SSL connections. Leave blank to use Jetty's
+      #   default.
+      #SCHEMA_REGISTRY_SSL_KEYMANAGER_ALGORITHM: ''
+
+      # ssl.trustmanager.algorithm
+      #   Used for HTTPS. The algorithm used by the trust manager factory for SSL connections. Leave blank to use
+      #   Jetty's default.
+      #SCHEMA_REGISTRY_SSL_TRUSTMANAGER_ALGORITHM: ''
+
+      # ssl.cipher.suites
+      #   Used for HTTPS. A list of SSL cipher suites. Comma-separated list. Leave blank to use Jetty's defaults.
+      #SCHEMA_REGISTRY_SSL_CIPHER_SUITES: ''
+
+      # ssl.endpoint.identification.algorithm
+      #   Used for HTTPS. The endpoint identification algorithm to validate the server hostname using the server
+      #   certificate. Leave blank to use Jetty's default.
+      #SCHEMA_REGISTRY_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ''
+
+      # kafkastore.sasl.kerberos.kinit.cmd
+      #   The Kerberos kinit command path.
+      #SCHEMA_REGISTRY_KAFKASTORE_SASL_KERBEROS_KINIT_CMD: '/usr/bin/kinit'
+
+      # kafkastore.sasl.kerberos.min.time.before.relogin
+      #   The login time between refresh attempts.
+      #SCHEMA_REGISTRY_KAFKASTORE_SASL_KERBEROS_MIN_TIME_BEFORE_RELOGIN: 60000
+
+      # kafkastore.sasl.kerberos.ticket.renew.jitter
+      #   The percentage of random jitter added to the renewal time.
+      #SCHEMA_REGISTRY_KAFKASTORE_SASL_KERBEROS_TICKET_RENEW_JITTER: 0.05
+
+      # kafkastore.sasl.kerberos.ticket.renew.window.factor
+      #   Login thread will sleep until the specified window factor of time from last refresh to ticket's expiry has
+      #   been reached, at which time it will try to renew the ticket.
+      #SCHEMA_REGISTRY_KAFKASTORE_SASL_KERBEROS_TICKET_RENEW_WINDOW_FACTOR: 0.8
+
+      # kafkastore.group.id
+      #   Use this setting to override the group.id for the KafkaStore consumer. This setting can become important when
+      #   security is enabled, to ensure stability over Schema Registry consumer's group.id
+      #   Without this configuration, group.id will be schema-registry-<host>-<port>.
+      #SCHEMA_REGISTRY_KAFKASTORE_GROUP_ID: ''
