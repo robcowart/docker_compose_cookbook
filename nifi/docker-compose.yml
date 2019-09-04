@@ -1,0 +1,238 @@
+version: '3'
+services:
+  nifi:
+    image: apache/nifi:1.9.2
+    container_name: nifi
+    restart: unless-stopped
+    network_mode: bridge
+    ports:
+      # HTTP
+      - 8080:8080/tcp
+      # HTTPS
+      - 8443:8443/tcp
+      # Remote Input Socket
+      - 10000:10000/tcp
+      # JVM Debugger
+      - 8000:8000/tcp
+      # Cluster Node Protocol
+      #- 11443:11443/tcp
+    volumes:
+      # mkdir /var/lib/nifi && chown -R 1000:1000 /var/lib/nifi
+      - /var/lib/nifi/database_repository:/opt/nifi/nifi-current/database_repository
+      - /var/lib/nifi/flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
+      - /var/lib/nifi/content_repository:/opt/nifi/nifi-current/content_repository
+      - /var/lib/nifi/provenance_repository:/opt/nifi/nifi-current/provenance_repository
+      - /var/lib/nifi/state:/opt/nifi/nifi-current/state
+      - /var/lib/nifi/logs:/opt/nifi/nifi-current/logs
+      
+      # A custom nifi.properties file can be mounted as follows.
+      #- /var/lib/nifi/conf/nifi.properties:/opt/nifi/nifi-current/conf/nifi.properties:ro
+
+    environment:
+      
+      ########## JVM ##########
+      
+      # -Xms
+      #   The initial JVM heap size.
+      #NIFI_JVM_HEAP_INIT: 512m
+
+      # -Xmx
+      #   The maximum JVM heap size.
+      #NIFI_JVM_HEAP_MAX: 512m
+      
+      # -Xdebug
+      #   The JVM Debugger can be enabled by setting this environment variable to any value.
+      #NIFI_JVM_DEBUGGER: ''
+
+
+
+      ########## Web ##########
+
+      # nifi.web.http.host
+      NIFI_WEB_HTTP_HOST: '0.0.0.0'
+      
+      # nifi.web.http.port
+      #   HTTP Port
+      NIFI_WEB_HTTP_PORT: 8080
+
+      # nifi.web.https.host
+      #NIFI_WEB_HTTPS_HOST: '0.0.0.0'
+      
+      # nifi.web.https.port
+      #   HTTPS Port
+      #NIFI_WEB_HTTP_PORT: 8443
+
+      # nifi.web.proxy.host
+      #   If mapping the HTTPS port specifying trusted hosts should be provided for this property.
+      #NIFI_WEB_PROXY_HOST: ''
+
+      # nifi.web.proxy.context.path
+      #   If NiFi is proxied at context paths other than the root path of the proxy, the paths need to be set in this
+      #   property.
+      #NIFI_WEB_PROXY_CONTEXT_PATH: ''
+
+
+
+      ########## Security ##########
+
+      # nifi.security.keystore
+      #  Filename of the Keystore that contains the server’s private key.
+      #KEYSTORE_PATH: '/opt/certs/keystore.jks'
+      
+      # nifi.security.keystorePasswd
+      #   The password for the Keystore.
+      #KEYSTORE_PASSWORD: ''
+
+      # nifi.security.keystoreType
+      #   The type of Keystore. Must be either PKCS12 or JKS. JKS is the preferred type, PKCS12 files will be loaded
+      #   with BouncyCastle provider.
+      #KEYSTORE_TYPE: JKS
+
+      # nifi.security.keyPasswd
+      #   The password for the certificate in the Keystore. If not set, the value of nifi.security.keystorePasswd will
+      #   be used.
+      #KEY_PASSWORD: ''
+
+      # nifi.security.truststore
+      #   Filename of the Truststore that will be used to authorize those connecting to NiFi. A secured instance with
+      #   no Truststore will refuse all incoming connections.
+      #TRUSTSTORE_PATH: '/opt/certs/truststore.jks'
+
+      # nifi.security.truststorePasswd
+      #   The password for the Truststore.
+      #TRUSTSTORE_PASSWORD: ''
+
+      # nifi.security.truststoreType
+      #   The type of the Truststore. Must be either PKCS12 or JKS. JKS is the preferred type, PKCS12 files will be
+      #   loaded with BouncyCastle provider.
+      #TRUSTSTORE_TYPE: JKS
+
+
+
+      ########## LDAP ##########
+
+      # Url - Space-separated list of URLs of the LDAP servers (i.e. ldap://<hostname>:<port>).
+      #LDAP_URL: 'ldap://ldap:389'
+
+      # Manager DN - The DN of the manager that is used to bind to the LDAP server to search for users.
+      #LDAP_MANAGER_DN: 'cn=admin,dc=example,dc=org'
+      
+      # Manager Password - The password of the manager that is used to bind to the LDAP server to search for users.
+      #LDAP_MANAGER_PASSWORD: 'password'
+      
+      # User Search Base - Base DN for searching for users (i.e. CN=Users,DC=example,DC=com).
+      #LDAP_USER_SEARCH_BASE: 'dc=example,dc=org'
+      
+      # User Search Filter - Filter for searching for users against the User Search Base. (i.e. sAMAccountName={0}).
+      # The user specified name is inserted into '{0}'.
+      #LDAP_USER_SEARCH_FILTER: 'cn={0}'
+      
+      # Authentication Strategy - How the connection to the LDAP server is authenticated. Possible values are
+      # ANONYMOUS, SIMPLE, LDAPS, or START_TLS.
+      #LDAP_AUTHENTICATION_STRATEGY: 'SIMPLE'
+      
+      # Identity Strategy - Strategy to identify users. Possible values are USE_DN and USE_USERNAME. The default
+      # functionality if this property is missing is USE_DN in order to retain backward compatibility. USE_DN will use
+      # the full DN of the user entry if possible. USE_USERNAME will use the username the user logged in with.
+      #LDAP_IDENTITY_STRATEGY: 'USE_DN'
+      
+      # TLS Keystore - Path to the Keystore that is used when connecting to LDAP using LDAPS or START_TLS.
+      #LDAP_TLS_KEYSTORE: ''
+      
+      # TLS Keystore Password - Password for the Keystore that is used when connecting to LDAP using LDAPS or
+      # START_TLS.
+      #LDAP_TLS_KEYSTORE_PASSWORD: ''
+      
+      # TLS Keystore Type - Type of the Keystore that is used when connecting to LDAP using LDAPS or START_TLS (i.e.
+      # JKS or PKCS12).
+      #LDAP_TLS_KEYSTORE_TYPE: ''
+      
+      # TLS Truststore - Path to the Truststore that is used when connecting to LDAP using LDAPS or START_TLS.
+      #LDAP_TLS_TRUSTSTORE: ''
+      
+      # TLS Truststore Password - Password for the Truststore that is used when connecting to LDAP using LDAPS or
+      # START_TLS.
+      #LDAP_TLS_TRUSTSTORE_PASSWORD: ''
+      
+      # TLS Truststore Type - Type of the Truststore that is used when connecting to LDAP using LDAPS or START_TLS
+      # (i.e. JKS or PKCS12).
+      #LDAP_TLS_TRUSTSTORE_TYPE: ''
+
+      # TLS Protocol - Protocol to use when connecting to LDAP using LDAPS or START_TLS. (i.e. TLS, TLSv1.1, TLSv1.2,
+      # etc).
+      #LDAP_TLS_PROTOCOL: ''
+
+
+
+      ########## Initial Identities ##########
+
+      #INITIAL_ADMIN_IDENTITY: 'CN=Random User, O=Apache, OU=NiFi, C=US'
+      
+      #NODE_IDENTITY: ''
+
+
+
+      ########## Cluster ##########
+
+      # nifi.cluster.is.node
+      #NIFI_CLUSTER_IS_NODE: 'false'
+      
+      # nifi.cluster.node.address
+      #NIFI_CLUSTER_NODE_ADDRESS: ''
+      
+      # nifi.cluster.node.protocol.port
+      #   Cluster Node Protocol Port
+      #NIFI_CLUSTER_NODE_PROTOCOL_PORT: 11443
+      
+      # nifi.cluster.node.protocol.threads
+      #NIFI_CLUSTER_NODE_PROTOCOL_THREADS: 10
+      
+      # nifi.cluster.node.protocol.max.threads
+      #NIFI_CLUSTER_NODE_PROTOCOL_MAX_THREADS: 50
+
+      # nifi.remote.input.host
+      #   The hostname that clients can use to reach this host. This will be used by both RAW socket and HTTP.
+      #NIFI_REMOTE_INPUT_HOST: ''
+
+      # nifi.remote.input.socket.port
+      #   Remote Input Socket Port - The port number that clients can use to reach this host. RAW socket Site-to-Site
+      #   is enabled when this property is set.
+      #NIFI_REMOTE_INPUT_SOCKET_PORT: 10000
+      
+      # nifi.zookeeper.connect.string
+      #NIFI_ZK_CONNECT_STRING: '192.0.2.11:2181,192.0.2.12:2181,192.0.2.13:2181'
+      
+      # nifi.zookeeper.root.node
+      #NIFI_ZK_ROOT_NODE: '/nifi'
+
+
+
+      ########## Flow Election ##########
+
+      # When a cluster first starts up, NiFi must determine which of the nodes have the "correct" version of the flow.
+      # This is done by voting on the flows that each of the nodes has. When a node attempts to connect to a cluster,
+      # it provides a copy of its local flow to the Cluster Coordinator. If no flow has yet been elected the "correct"
+      # flow, the node's flow is compared to each of the other Nodes' flows. If another Node's flow matches this one, a
+      # vote is cast for this flow. If no other Node has reported the same flow yet, this flow will be added to the
+      # pool of possibly elected flows with one vote. After some amount of time has elapsed or some number of Nodes
+      # have cast votes, a flow is elected to be the "correct" copy of the flow. All nodes that have incompatible flows
+      # are then disconnected from the cluster while those with compatible flows inherit the cluster's flow. Election
+      # is performed according to the "popular vote" with the caveat that the winner will never be an "empty flow"
+      # unless all flows are empty. This allows an administrator to remove a node's flow.xml.gz file and restart the
+      # node, knowing that the node's flow will not be voted to be the "correct" flow unless no other flow is found.
+
+      # nifi.cluster.flow.election.max.wait.time
+      #   The amount of time after which a flow is elected to be the "correct" copy of the flow.
+      #NIFI_ELECTION_MAX_WAIT: '5 mins'
+
+      # nifi.cluster.flow.election.max.candidates
+      #   The number of nodes to cast votes after which a flow is elected to be the "correct" copy of the flow.
+      #NIFI_ELECTION_MAX_CANDIDATES: ''
+
+
+
+      ########## Variable Registry ##########
+
+      # nifi.variable.registry.properties
+      #   External properties files for variable registry. Supports a comma delimited list of file locations.
+      #NIFI_VARIABLE_REGISTRY_PROPERTIES: ''
