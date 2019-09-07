@@ -17,7 +17,7 @@
 version: '3'
 services:
   zoonavigator-api:
-    image: elkozmon/zoonavigator-api:0.6.1
+    image: elkozmon/zoonavigator-api:0.6.2
     container_name: zoonavigator-api
     restart: unless-stopped
     hostname: zoonavigator-api
