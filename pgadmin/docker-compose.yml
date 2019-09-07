@@ -17,7 +17,7 @@
 version: '3'
 services:
   pgadmin:
-    image: dpage/pgadmin4:4.11
+    image: dpage/pgadmin4:4.12
     container_name: pgadmin
     restart: unless-stopped
     hostname: pgadmin
