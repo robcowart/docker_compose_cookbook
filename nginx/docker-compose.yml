@@ -17,7 +17,7 @@
 version: '3'
 services:
   nginx:
-    image: nginx:1.16.0
+    image: nginx:1.17.3
     container_name: nginx
     restart: unless-stopped
     hostname: nginx
