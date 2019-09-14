@@ -1,7 +1,7 @@
 version: '3'
 services:
   kafka-rest:
-    image: confluentinc/cp-kafka-rest:5.3.0-1
+    image: confluentinc/cp-kafka-rest:5.3.1-1
     container_name: kafka-rest
     restart: unless-stopped
     network_mode: bridge
