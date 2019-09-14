@@ -19,7 +19,7 @@ networks:
   tick:
 services:
   influxdb:
-    image: influxdb:1.7.7
+    image: influxdb:1.7.8
     container_name: influxdb
     restart: 'no'
     ulimits:
@@ -390,7 +390,7 @@ services:
       #INFLUXDB_TLS_MAX_VERSION: tls1.2
 
   chronograf:
-    image: chronograf:1.7.12
+    image: chronograf:1.7.14
     container_name: chronograf
     depends_on:
       - influxdb
@@ -622,35 +622,3 @@ services:
       KAPACITOR_STATS_STATS_INTERVAL: 10s
       KAPACITOR_STATS_DATABASE: _kapacitor
       KAPACITOR_STATS_RETENTION_POLICY: autogen
-
-  grafana:
-    image: grafana/grafana:6.2.5
-    container_name: grafana
-    depends_on:
-      - influxdb
-    restart: 'no'
-    hostname: grafana
-    networks:
-      - tick
-    ports:
-      - 3000:3000/tcp
-    volumes:
-      - /var/lib/grafana:/var/lib/grafana
-      - /var/log/grafana:/var/log/grafana
-      - /etc/grafana/provisioning:/etc/grafana/provisioning
-    environment:
-      GF_SERVER_ROOT_URL: http://grafana:3000
-      #GF_SECURITY_ADMIN_PASSWORD: changeme
-      #GF_INSTALL_PLUGINS: 'grafana-clock-panel,grafana-simple-json-datasource,grafana-worldmap-panel,grafana-clock-panel,grafana-piechart-panel,grafana-influxdb-flux-datasource,grafana-kubernetes-app,grafana-polystat-panel'
-
-      #GF_PATHS_CONFIG: /etc/grafana/grafana.ini
-      #GF_PATHS_PROVISIONING: /etc/grafana/provisioning
-      #GF_PATHS_HOME: /usr/share/grafana
-      #GF_PATHS_LOGS: /var/log/grafana
-      #GF_PATHS_DATA: /var/lib/grafana
-      #GF_PATHS_PLUGINS: /var/lib/grafana/plugins
-
-      #GF_AWS_PROFILES: default
-      #GF_AWS_default_ACCESS_KEY_ID: YOUR_ACCESS_KEY
-      #GF_AWS_default_SECRET_ACCESS_KEY: YOUR_SECRET_KEY
-      #GF_AWS_default_REGION: us-east-1
