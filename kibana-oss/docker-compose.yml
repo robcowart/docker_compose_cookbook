@@ -17,7 +17,7 @@
 version: '3'
 services:
   kibana-oss:
-    image: docker.elastic.co/kibana/kibana-oss:7.3.1
+    image: docker.elastic.co/kibana/kibana-oss:7.3.2
     container_name: kibana-oss
     restart: unless-stopped
     hostname: kibana
