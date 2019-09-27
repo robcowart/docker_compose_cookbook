@@ -39,40 +39,243 @@ services:
       - /var/lib/zookeeper/log:/var/lib/zookeeper/log
       - /var/log/zookeeper:/var/log/zookeeper
     environment:
+      ########## JVM ##########
+
       # JVM heap size.
       KAFKA_HEAP_OPTS: '-Xms512m -Xmx512m'
-      
+
       # JMX Settings.
-      KAFKA_JMX_HOSTNAME: 0.0.0.0
+      KAFKA_JMX_HOSTNAME: 127.0.0.1
       KAFKA_JMX_PORT: 10020
       #KAFKA_JMX_OPTS: '-Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote=true  -Dcom.sun.management.jmxremote.port=10020 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false'
-      
+
       # The directory where ZooKeeper logs will be stored.
       LOG_DIR: /var/log/zookeeper
-      
-      # The directory where ZooKeeper data will be stored.
-      ZOOKEEPER_DATA_DIR: /var/lib/zookeeper
-      
-      # the port at which the clients will connect
+
+
+
+      ########## Minimum Configuration ##########
+
+      # clientPort
+      #   the port to listen for client connections; that is, the port that clients attempt to connect to.
       ZOOKEEPER_CLIENT_PORT: 2181
-      
-      # The number of milliseconds of each tick
+
+      # dataDir
+      #   the location where ZooKeeper will store the in-memory database snapshots and, unless specified otherwise, the
+      #   transaction log of updates to the database.
+      #   NOTE - Be careful where you put the transaction log. A dedicated transaction log device is key to consistent
+      #          good performance. Putting the log on a busy device will adversely effect performance.
+      ZOOKEEPER_DATA_DIR: /var/lib/zookeeper
+
+      # tickTime
+      #   the length of a single tick, which is the basic time unit used by ZooKeeper, as measured in milliseconds. It
+      #   is used to regulate heartbeats, and timeouts. For example, the minimum session timeout will be two ticks.
       ZOOKEEPER_TICK_TIME: 2000
-      
-      # The number of ticks that the initial synchronization phase can take
-      ZOOKEEPER_INIT_LIMIT: 5
-      
-      # The number of ticks that can pass between sending a request and getting an acknowledgement
-      ZOOKEEPER_SYNC_LIMIT: 2
-      
-      # Limits the number of concurrent connections (at the socket level) that a single client, identified by IP address, may make to a single member of the ZooKeeper ensemble. Defaults to 60. Disabled is 0.
-      ZOOKEEPER_MAX_CLIENT_CNXNS: 0
-      
+
+
+
+      ########## Cluster Options ##########
+      # The options in this section are designed for use with an ensemble of servers -- that is, when deploying
+      # clusters of servers.
+
       # The id must be unique within the ensemble and should have a value between 1 and 255.
       ZOOKEEPER_SERVER_ID: 1
-      
-      # A list of machines of the Zookeeper ensemble.
-      ZOOKEEPER_SERVERS: zookeeper:2888:3888
+
+      # server.x=[hostname]:nnnnn[:nnnnn], etc (No Java system property)
+      #   servers making up the ZooKeeper ensemble. When the server starts up, it determines which server it is by
+      #   looking for the file myid in the data directory. That file contains the server number, in ASCII, and it
+      #   should match x in server.x in the left hand side of this setting. There are two port numbers nnnnn. The first
+      #   followers use to connect to the leader, and the second is for leader election. The leader election port is
+      #   only necessary if electionAlg is 1, 2, or 3 (default). If electionAlg is 0, then the second port is not
+      #   necessary. If you want to test multiple servers on a single machine, then different ports can be used for
+      #   each server.
+      #   IMPORTANT - The list of servers that make up ZooKeeper servers that is used by the clients must match the
+      #               list of ZooKeeper servers that each ZooKeeper server has.
+      ZOOKEEPER_SERVERS: 'zookeeper:2888:3888'
+
+      # initLimit (No Java system property)
+      #   Amount of time, in ticks (see tickTime), to allow followers to connect and sync to a leader. Increased this
+      #   value as needed, if the amount of data managed by ZooKeeper is large.
+      ZOOKEEPER_INIT_LIMIT: 5
+
+      # syncLimit (No Java system property)
+      #   Amount of time, in ticks (see tickTime), to allow followers to sync with ZooKeeper. If followers fall too far
+      #   behind a leader, they will be dropped.
+      ZOOKEEPER_SYNC_LIMIT: 2
+
+      # electionAlg (No Java system property)
+      #   Election implementation to use.
+      #     0 - (deprecated) corresponds to the original UDP-based version
+      #     1 - (deprecated) corresponds to the non-authenticated UDP-based version of fast leader election
+      #     2 - (deprecated) corresponds to the authenticated UDP-based version of fast leader election
+      #     3 - corresponds to TCP-based version of fast leader election.
+      #   Currently, algorithm 3 is the default
+      #ZOOKEEPER_ELECTION_ALG: 3
+
+      # leaderServes (Java system property: zookeeper.leaderServes)
+      #   Leader accepts client connections. Default value is "yes". The leader machine coordinates updates. For higher
+      #   update throughput at thes slight expense of read throughput the leader can be configured to not accept
+      #   clients and focus on coordination. The default to this option is yes.
+      #   NOTE - Turning on leader selection is highly recommended when you have more than three ZooKeeper servers in
+      #          an ensemble.
+      #ZOOKEEPER_LEADER_SERVES: 'yes'
+
+
+
+      ########## Advanced Configuration ##########
+
+      # dataLogDir
+      #   This option will direct the machine to write the transaction log to the dataLogDir rather than the dataDir.
+      #   This allows a dedicated log device to be used, and helps avoid competition between logging and snaphots.
+      #   NOTE - Having a dedicated log device has a large impact on throughput and stable latencies. It is highly
+      #          recommened to dedicate a log device and set dataLogDir to point to a directory on that device, and
+      #          then make sure to point dataDir to a directory not residing on that device.
+      #ZOOKEEPER_DATA_LOG_DIR: ''
+
+      # globalOutstandingLimit (Java system property: zookeeper.globalOutstandingLimit.)
+      #   Clients can submit requests faster than ZooKeeper can process them, especially if there are a lot of clients.
+      #   To prevent ZooKeeper from running out of memory due to queued requests, ZooKeeper will throttle clients so
+      #   that there is no more than globalOutstandingLimit outstanding requests in the system. The default limit is
+      #   1,000.
+      ZOOKEEPER_GLOBAL_OUTSTANDING_LIMIT: 1000
+
+      # preAllocSize (Java system property: zookeeper.preAllocSize)
+      #   To avoid seeks ZooKeeper allocates space in the transaction log file in blocks of preAllocSize kilobytes. The
+      #   default block size is 64M. One reason for changing the size of the blocks is to reduce the block size if
+      #   snapshots are taken more often. (Also, see snapCount).
+      #ZOOKEEPER_PRE_ALLOC_SIZE: ''
+
+      # snapCount (Java system property: zookeeper.snapCount)
+      #   ZooKeeper logs transactions to a transaction log. After snapCount transactions are written to a log file a
+      #   snapshot is started and a new transaction log file is created. The default snapCount is 100,000.
+      ZOOKEEPER_SNAP_COUNT: 100000
+
+      # maxClientCnxns (No Java system property)
+      #   Limits the number of concurrent connections (at the socket level) that a single client, identified by IP
+      #   address, may make to a single member of the ZooKeeper ensemble. This is used to prevent certain classes of
+      #   DoS attacks, including file descriptor exhaustion. The default is 60. Setting this to 0 entirely removes the
+      #   limit on concurrent connections.
+      ZOOKEEPER_MAX_CLIENT_CNXNS: 60
+
+      # clientPortAddress
+      #   the address (ipv4, ipv6 or hostname) to listen for client connections; that is, the address that clients
+      #   attempt to connect to. This is optional, by default we bind in such a way that any connection to the
+      #   clientPort for any address/interface/nic on the server will be accepted.
+      #ZOOKEEPER_CLIENT_PORT_ADDRESS: ''
+
+      # minSessionTimeout (No Java system property)
+      #   the minimum session timeout in milliseconds that the server will allow the client to negotiate. Defaults to 2
+      #   times the tickTime.
+      ZOOKEEPER_MIN_SESSION_TIMEOUT: 2
+
+      # maxSessionTimeout (No Java system property)
+      #   the maximum session timeout in milliseconds that the server will allow the client to negotiate. Defaults to
+      #   20 times the tickTime.
+      ZOOKEEPER_MAX_SESSION_TIMEOUT: 20
+
+      # fsync.warningthresholdms (Java system property: zookeeper.fsync.warningthresholdms)
+      #   A warning message will be output to the log whenever an fsync in the Transactional Log (WAL) takes longer
+      #   than this value. The values is specified in milliseconds and defaults to 1000. This value can only be set as
+      #   a system property.
+      ZOOKEEPER_FSYNC_WARNINGTHRESHOLDMS: 1000
+
+      # autopurge.snapRetainCount (No Java system property)
+      #   When enabled, ZooKeeper auto purge feature retains the autopurge.snapRetainCount most recent snapshots and
+      #   the corresponding transaction logs in the dataDir and dataLogDir respectively and deletes the rest. Defaults
+      #   to 3. Minimum value is 3.
+      ZOOKEEPER_AUTOPURGE_SNAP_RETAIN_COUNT: 3
+
+      # autopurge.purgeInterval (No Java system property)
+      #   The time interval in hours for which the purge task has to be triggered. Set to a positive integer (1 and
+      #   above) to enable the auto purging. Defaults to 0.
+      ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL: 0
+
+      # syncEnabled (Java system property: zookeeper.observer.syncEnabled)
+      #   The observers now log transaction and write snapshot to disk by default like the participants. This reduces
+      #   the recovery time of the observers on restart. Set to "false" to disable this feature. Default is "true"
+      ZOOKEEPER_SYNC_ENABLED: 'true'
+
+      # cnxTimeout (Java system property: zookeeper.cnxTimeout)
+      #   Sets the timeout value for opening connections for leader election notifications. Only applicable if you are
+      #   using electionAlg 3. Default value is 5 seconds.
+      ZOOKEEPER_CNX_TIMEOUT: 5
+
+      # 4lw.commands.whitelist (Java system property: zookeeper.4lw.commands.whitelist)
+      #   This property contains a list of comma separated Four Letter Words commands. It is introduced to provide fine
+      #   grained control over the set of commands ZooKeeper can execute, so users can turn off certain commands if
+      #   necessary. By default it contains all supported four letter word commands except "wchp" and "wchc", if the
+      #   property is not specified. If the property is specified, then only commands listed in the whitelist are
+      #   enabled. Example: 4lw.commands.whitelist=stat, ruok, conf, isro
+      ZOOKEEPER_4LW_COMMANDS_WHITELIST: '*'
+
+
+
+      ########## Hierarchical Quorums ##########
+      # The following provides an example of how to use hierarchical quorums. The basic idea is very simple. First, we
+      # split servers into groups, and add a line for each group listing the servers that form this group. Next we have
+      # to assign a weight to each server.
+      #
+      # The following example shows how to configure a system with three groups of three servers each, and we assign a
+      # weight of 1 to each server:
+      #
+      #   group.1=1:2:3
+      #   group.2=4:5:6
+      #   group.3=7:8:9
+      #
+      #   weight.1=1
+      #   weight.2=1
+      #   weight.3=1
+      #   weight.4=1
+      #   weight.5=1
+      #   weight.6=1
+      #   weight.7=1
+      #   weight.8=1
+      #   weight.9=1
+      #
+      # When running the system, we are able to form a quorum once we have a majority of votes from a majority of
+      # non-zero-weight groups. Groups that have zero weight are discarded and not considered when forming quorums.
+      # Looking at the example, we are able to form a quorum once we have votes from at least two servers from each of
+      # two different groups.
+
+      # group.x=nnnnn[:nnnnn] (No Java system property)
+      #   Enables a hierarchical quorum construction. "x" is a group identifier and the numbers following the "=" sign
+      #   correspond to server identifiers. The left-hand side of the assignment is a colon-separated list of server
+      #   identifiers. Note that groups must be disjoint and the union of all groups must be the ZooKeeper ensemble.
+
+      # weight.x=nnnnn (No Java system property)
+      #   Used along with "group", it assigns a weight to a server when forming quorums. Such a value corresponds to
+      #   the weight of a server when voting. There are a few parts of ZooKeeper that require voting such as leader
+      #   election and the atomic broadcast protocol. By default the weight of server is 1. If the configuration
+      #   defines groups, but not weights, then a value of 1 will be assigned to all servers.
+
+
+
+      ########## Experimental Options/Features ##########
+      # New features that are currently considered experimental.
+
+      # forceSync (Java system property: zookeeper.forceSync)
+      #   Requires updates to be synced to media of the transaction log before finishing processing the update. If this
+      #   option is set to no, ZooKeeper will not require updates to be synced to the media.
+      #ZOOKEEPER_FORCE_SYNC: ''
+
+      # jute.maxbuffer: (Java system property: jute.maxbuffer)
+      #   This option can only be set as a Java system property. There is no zookeeper prefix on it. It specifies the
+      #   maximum size of the data that can be stored in a znode. The default is 0xfffff, or just under 1M. If this
+      #   option is changed, the system property must be set on all servers and clients otherwise problems will arise.
+      #   This is really a sanity check. ZooKeeper is designed to store data on the order of kilobytes in size.
+      #ZOOKEEPER_JUTE_MAXBUFFER: ''
+
+      # skipACL (Java system property: zookeeper.skipACL)
+      #   Skips ACL checks. This results in a boost in throughput, but opens up full access to the data tree to
+      #   everyone.
+      #ZOOKEEPER_SKIP_ACL: ''
+
+      # quorumListenOnAllIPs
+      #   When set to true the ZooKeeper server will listen for connections from its peers on all available IP
+      #   addresses, and not only the address configured in the server list of the configuration file. It affects the
+      #   connections handling the ZAB protocol and the Fast Leader Election protocol. Default value is false.
+      #ZOOKEEPER_QUORUM_LISTEN_ON_ALL_IPS: 'false'
+
 
   kafka:
     image: confluentinc/cp-kafka:5.3.1-1
