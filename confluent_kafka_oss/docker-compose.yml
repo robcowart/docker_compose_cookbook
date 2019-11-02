@@ -27,6 +27,7 @@ services:
       - 9092:9092/tcp
       # JMX
       - 10030:10030/tcp
+      - 10031:10031/tcp
     volumes:
       - /var/lib/kafka/data:/var/lib/kafka/data
       - /var/log/kafka:/var/log/kafka
@@ -37,7 +38,7 @@ services:
       # JMX Settings.
       KAFKA_JMX_HOSTNAME: 127.0.0.1
       KAFKA_JMX_PORT: 10030
-      #KAFKA_JMX_OPTS: '-Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=10030 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false'
+      #KAFKA_JMX_OPTS: '-Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=10030 -Dcom.sun.management.jmxremote.rmi.port=10031 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false'
 
       # A comma seperated list of directories under which to store log files
       LOG_DIR: /var/log/kafka

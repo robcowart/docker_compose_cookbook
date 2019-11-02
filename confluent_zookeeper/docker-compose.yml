@@ -31,6 +31,7 @@ services:
       - 3888:3888/tcp
       # JMX
       - 10020:10020/tcp
+      - 10021:10021/tcp
     volumes:
       - /var/lib/zookeeper/data:/var/lib/zookeeper/data
       - /var/lib/zookeeper/log:/var/lib/zookeeper/log
@@ -44,7 +45,7 @@ services:
       # JMX Settings.
       KAFKA_JMX_HOSTNAME: 127.0.0.1
       KAFKA_JMX_PORT: 10020
-      #KAFKA_JMX_OPTS: '-Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote=true  -Dcom.sun.management.jmxremote.port=10020 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false'
+      #KAFKA_JMX_OPTS: '-Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=10020 -Dcom.sun.management.jmxremote.rmi.port=10021 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false'
 
       # The directory where ZooKeeper logs will be stored.
       LOG_DIR: /var/log/zookeeper
