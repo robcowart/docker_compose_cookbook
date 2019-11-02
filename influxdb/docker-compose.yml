@@ -17,7 +17,7 @@
 version: '3'
 services:
   influxdb:
-    image: influxdb:1.7.8
+    image: influxdb:1.7.9
     container_name: influxdb
     restart: unless-stopped
     ulimits:
