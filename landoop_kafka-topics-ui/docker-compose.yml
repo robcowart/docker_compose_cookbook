@@ -1,0 +1,59 @@
+#------------------------------------------------------------------------------
+# Copyright 2019 Robert Cowart
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#------------------------------------------------------------------------------
+
+version: '3'
+services:
+  kafka-topics-ui:
+    image: landoop/kafka-topics-ui:latest
+    container_name: kafka-topics-ui
+    restart: unless-stopped
+    network_mode: bridge
+    ports:
+      - 8000:8000/tcp
+    environment:
+      KAFKA_REST_PROXY_URL: 'http://192.0.2.11:8082'
+
+      # The port number to use for kafka-topics-ui. The default is 8000. Usually the main reason for using this is when
+      # you run the container with --net=host, where you can't use docker's publish flag (-p HOST_PORT:8000).
+      #PORT: 8000
+      
+      # If you have CORS issues or want to pass through firewalls and maybe share your server, add the PROXY option.
+      # Run the container with -e PROXY=true and Caddy server will proxy the traffic to the REST Proxy.
+      # IMPORTANT: When proxying, for the KAFKA_REST_PROXY_URL you have to use an IP address or a domain that can be
+      # resolved to it. You can't use localhost even if you serve Kafka REST port from your localhost. The reason for
+      # this is that a docker container has its own network, so your localhost is different from the container's
+      # localhost. As an example, if you are in your home network and have an IP address of 192.168.5.65 and run Kafka
+      # REST from your computer, instead of http://127.0.1:8082 you must use http://192.168.5.65:8082.
+      PROXY: 'true'
+
+      # If your REST Proxy uses self-signed SSL certificates, you can use the PROXY_SKIP_VERIFY=true environment
+      # variable to instruct the proxy to not verify the backend TLS certificate.
+      #PROXY_SKIP_VERIFY: 'true'
+
+      #MAX_BYTES: 50000
+      
+      #RECORD_POLL_TIMEOUT: 2000
+      
+      #DEBUG_LOGS_ENABLED: 'true'
+
+      # The webserver that powers the image is Caddy. Via this variable you can add options that will be appended to
+      # its configuration (Caddyfile). Variables than span multiple lines are supported.
+      #
+      # As an example, you can set Caddy to not apply timeouts via:
+      #   -e "CADDY_OPTIONS=timeouts none"
+      # Or you can set basic authentication via:
+      #   -e "CADDY_OPTIONS=basicauth / [USER] [PASS]"
+      #CADDY_OPTIONS: '[]'
