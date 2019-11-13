@@ -17,7 +17,7 @@
 version: '3'
 services:
   timescaledb:
-    image: timescale/timescaledb:1.4.1-pg11
+    image: timescale/timescaledb:1.5.1-pg11
     container_name: timescaledb
     restart: unless-stopped
     hostname: timescaledb
