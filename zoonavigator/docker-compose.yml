@@ -16,112 +16,112 @@
 
 version: '3'
 services:
-  zoonavigator-api:
-    image: elkozmon/zoonavigator-api:0.6.2
-    container_name: zoonavigator-api
+  zoonavigator:
+    image: elkozmon/zoonavigator:0.7.1
+    container_name: zoonavigator
     restart: unless-stopped
-    hostname: zoonavigator-api
     network_mode: bridge
     ports:
       - 9000:9000/tcp
     environment:
-      ### API Server Settings
+      ########## Server ##########
 
       # Tells the HTTP server which port to bind to. To disable HTTP set this variable to disabled.
-      API_HTTP_PORT: 9000
-
+      HTTP_PORT: 9000
+      
       # If set, HTTPS server will bind to this port.
-      #API_HTTPS_PORT: 9443
-
+      #HTTPS_PORT: 
+      
       # The path to the keystore containing the private key and certificate, if not provided generates a keystore for
       # you.
-      # API_SSL_KEYSTORE_PATH: 
-
+      #SSL_KEYSTORE_PATH: ''
+      
       # The password to the keystore, defaults to a blank password.
-      #API_SSL_KEYSTORE_PASSWORD: 
-
+      #SSL_KEYSTORE_PASSWORD: ''
+      
       # The key store type.
-      #API_SSL_KEYSTORE_TYPE: 
-
+      #SSL_KEYSTORE_TYPE: JKS
+      
       # Sets session inactivity timeout for users. This value is in milliseconds.
-      # default: 900000
-      #API_SESSION_TIMEOUT_MILLIS: 900000
+      #SESSION_TIMEOUT_MILLIS: 900000
+      
+      # Secret key for Play Framework - used for signing session cookies and CSRF tokens. Defaults to 64 random
+      # characters generated from /dev/urandom.
+      #SECRET_KEY: ''
+      
+      # If set, ZooNavigator will use this value as a default connection string and skip the connect form,
+      # automatically connecting to listed ZooKeeper servers.
+      AUTO_CONNECT_CONNECTION_STRING: '192.0.2.11:2181,192.0.2.12:2181,192.0.2.13:2181'
+      
+      # In addition to presetting connection string as explained above, you can also set Auth info which ZooNavigator
+      # will use to authenticate with ZooKeeper during the auto-connect. Use semicolon (;) to separate multiple entries.
+      #AUTO_CONNECT_AUTH_INFO: ''
+      
 
-      # Secret key for Play Framework - used for signing session cookies and CSRF tokens.
-      # Defaults to 64 random characters generated from /dev/urandom.
-      #API_SECRET: 
 
-
-
-      ### Java Settings
-
+      ########## Java ##########
+      
       # Custom Java arguments.
-      #JAVA_OPTS: 
+      #JAVA_OPTS: ''
 
       # Sets initial Java heap size. This value is in bytes if no unit is specified.
-      #JAVA_XMS: 
+      #JAVA_XMS: ''
 
       # Sets maximum Java heap size. This value is in bytes if no unit is specified.
-      #JAVA_XMX: 
+      #JAVA_XMX: ''
 
       # Path to JAAS login configuration file to use.
-      #JAVA_JAAS_LOGIN_CONFIG
-
+      #JAVA_JAAS_LOGIN_CONFIG: ''
+      
       # If set to true, enables debugging mode and detailed logging for Kerberos.
-      #JAVA_KRB5_DEBUG
-
+      #JAVA_KRB5_DEBUG: ''
+      
       # Sets the default Kerberos realm.
-      #JAVA_KRB5_REALM
+      #JAVA_KRB5_REALM: ''
 
       # Sets the default Kerberos KDC.
-      #JAVA_KRB5_KDC
+      #JAVA_KRB5_KDC: ''
+      
 
-
-
-      ### Zookeeper Client Settings
-
+      
+      ########## ZooKeeper Client ##########
+      
       # Sets inactivity timeout for ZooKeeper client. If user doesn’t make any request during this period ZooKeeper
       # connection will be closed and recreated for the future request if any. Note that user does not get logged out
       # unlike in event of session timeout. This value is in milliseconds.
-      # default: 5000
-      #ZK_CLIENT_TIMEOUT_MILLIS: 5000
+      ZK_CLIENT_TIMEOUT_MILLIS: 5000
 
       # Sets timeout for attempt to establish connection with ZooKeeper. This value is in milliseconds.
-      # default: 5000
-      #ZK_CONNECT_TIMEOUT_MILLIS: 5000
+      ZK_CONNECT_TIMEOUT_MILLIS: 5000
 
       # Set the value to false to disable SASL authentication.
-      # default: true
-      ZK_SASL_CLIENT: "false"
-
+      ZK_SASL_CLIENT: 'false'
+      
       # Specifies the context key in the JAAS login file.
-      # default: Client
-      #ZK_SASL_CLIENT_CONFIG: Client
+      #ZK_SASL_CLIENT_CONFIG: 'Client'
 
       # Specifies the primary part of the server principal. Learn more here.
-      # default: zookeeper
-      #ZK_SASL_CLIENT_USERNAME: zookeeper
-
+      #ZK_SASL_CLIENT_USERNAME: 'zookeeper'
+      
       # Realm part of the server principal. By default it is the client principal realm.
-      #ZK_SERVER_REALM: 
-
+      #ZK_SERVER_REALM: ''
+      
       # If you want to connect to the server secure client port, you need to set this property to true. This will
       # connect to server using SSL with specified credentials. Note that it requires using the Netty client.
-      #ZK_CLIENT_SECURE: 
-
+      #ZK_CLIENT_SECURE: ''
+      
       # Specifies which ClientCnxnSocket to be used. If you want to connect to server’s secure client port, you need to
-      # set this property to: org.apache.zookeeper.ClientCnxnSocketNetty.
-      # default: org.apache.zookeeper.ClientCnxnSocketNIO
-      #ZK_CLIENT_CNXN_SOCKET: org.apache.zookeeper.ClientCnxnSocketNIO
+      # set this property to :org.apache.zookeeper.ClientCnxnSocketNetty.
+      ZK_CLIENT_CNXN_SOCKET: 'org.apache.zookeeper.ClientCnxnSocketNIO'
 
       # Specifies the file path to a JKS containing the local credentials to be used for SSL connections.
-      #ZK_SSL_KEYSTORE_PATH: 
-
+      #ZK_SSL_KEYSTORE_PATH: ''
+      
       # Specifies the password to a JKS containing the local credentials to be used for SSL connections.
-      #ZK_SSL_KEYSTORE_PASSWORD: 
-
+      #ZK_SSL_KEYSTORE_PASSWORD: ''
+      
       # Specifies the file path to a JKS containing the remote credentials to be used for SSL connections.
-      #ZK_SSL_TRUSTSTORE_PATH: 
-
+      #ZK_SSL_TRUSTSTORE_PATH: ''
+      
       # Specifies the password to a JKS containing the remote credentials to be used for SSL connections.
-      #ZK_SSL_TRUSTSTORE_PASSWORD: 
+      #ZK_SSL_TRUSTSTORE_PASSWORD: ''
