@@ -17,7 +17,7 @@
 version: '3'
 services:
   jenkins:
-    image: jenkins/jenkins:2.174
+    image: jenkins/jenkins:2.204
     container_name: jenkins
     restart: unless-stopped
     hostname: jenkins
