@@ -17,7 +17,7 @@
 version: '3'
 services:
   clickhouse:
-    image: yandex/clickhouse-server:19.13
+    image: yandex/clickhouse-server:19.16
     container_name: clickhouse
     restart: unless-stopped
     network_mode: bridge
