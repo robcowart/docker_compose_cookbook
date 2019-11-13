@@ -19,7 +19,7 @@ networks:
   open-distro:
 services:
   od-elasticsearch:
-    image: amazon/opendistro-for-elasticsearch:1.0.2
+    image: amazon/opendistro-for-elasticsearch:1.2.0
     container_name: od-elasticsearch
     restart: 'no'
     hostname: elasticsearch
@@ -30,7 +30,7 @@ services:
     networks:
       - open-distro
     ports:
-      # REST
+      # HTTP/REST
       - 9200:9200/tcp
       # Transport
       - 9300:9300/tcp
@@ -59,10 +59,10 @@ services:
 
       action.destructive_requires_name: 'true'
 
-      reindex.remote.whitelist: '*.*.*.*:*'
+      reindex.remote.whitelist: '*:*'
 
   od-kibana:
-    image: amazon/opendistro-for-elasticsearch-kibana:1.0.2
+    image: amazon/opendistro-for-elasticsearch-kibana:1.2.0
     container_name: od-kibana
     depends_on:
       - od-elasticsearch
@@ -71,6 +71,7 @@ services:
     networks:
       - open-distro
     ports:
+      # HTTP/REST
       - 5601:5601/tcp
     environment:
       # Set to false to disable Console. Toggling this will cause the server to regenerate assets on the next startup,

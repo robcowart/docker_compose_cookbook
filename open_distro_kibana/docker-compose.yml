@@ -17,7 +17,7 @@
 version: '3'
 services:
   od-kibana:
-    image: amazon/opendistro-for-elasticsearch-kibana:1.1.0
+    image: amazon/opendistro-for-elasticsearch-kibana:1.2.0
     container_name: od-kibana
     restart: unless-stopped
     hostname: kibana
