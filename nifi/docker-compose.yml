@@ -169,6 +169,9 @@ services:
       #INITIAL_ADMIN_IDENTITY: 'CN=Random User, O=Apache, OU=NiFi, C=US'
       
       #NODE_IDENTITY: ''
+      
+      #getting nifi.sensitive.props.key not found error without this prop
+      #NIFI_SENSITIVE_PROPS_KEY:please_edit_me!
 
 
 
